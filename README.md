@@ -24,6 +24,7 @@ A similar library for C++ exists called
 [QuickCheck++](http://software.legiasoft.com/quickcheck/). QuickCheck++ does
 not support several important things that the Haskell QuickCheck supports
 including:
+
   * *Generator combinators* - In QuickCheck++ custom generators for user
     defined types are written by hand, with no provided random number
     generation facility. One example of a way that Haskell's QuickCheck (and
@@ -40,7 +41,8 @@ including:
     reveal the structure of the failure.
 
 For these reasons, CppQuickCheck tries to maintain all the functionality of the
-Haskell QuickCheck.
+Haskell QuickCheck, and so taking a different implementation approach than
+QuickCheck++.
 
 # LICENSE
 
@@ -50,6 +52,7 @@ CppQuickCheck is distributed under a BSD license:
 > 
 > Redistribution and use in source and binary forms, with or without
 > modification, are permitted provided that the following conditions are met:
+>
 >   * Redistributions of source code must retain the above copyright notice,
 >     this list of conditions and the following disclaimer.
 >   * Redistributions in binary form must reproduce the above copyright notice,
