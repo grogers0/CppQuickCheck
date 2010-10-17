@@ -293,13 +293,35 @@ arbitrarySizedReal<long double>;
 const Shrink<long double>::type ArbitraryImpl<long double>::shrink =
 shrinkReal<long double>;
 
+inline std::vector<char> shrinkChar(char c)
+{
+    char possShrinks[] = {'a', 'b', 'c', 'A', 'B', 'C', '1', '2', '3', ' ',
+        '\n'};
+    std::vector<char> ret;
+    for (std::size_t i = 0; i < sizeof(possShrinks); ++i) {
+        if (possShrinks[i] < c)
+            ret.push_back(possShrinks[i]);
+    }
+    if (isupper(c) &&
+            std::find(possShrinks, possShrinks + sizeof(possShrinks),
+                tolower(c)) != possShrinks + sizeof(possShrinks))
+        ret.push_back(tolower(c));
+    return ret;
+}
+template<>
+struct ArbitraryImpl<char>
+{
+    static const Gen<char>::type generator;
+    static const Shrink<char>::type shrink;
+};
+const Gen<char>::type ArbitraryImpl<char>::generator = choose<char>(0, 127);
+const Shrink<char>::type ArbitraryImpl<char>::shrink = shrinkChar;
+
 template<class T>
 typename Gen<std::vector<T> >::type vector(std::size_t n)
 {
     return vectorOf(n, Arbitrary<T>::generator);
 }
-
-// todo - add a char implementation
 
 }
 

@@ -193,6 +193,20 @@ detail::ElementsContainer<T> elements(const T &x)
 
 namespace detail {
     template<class T>
+    T fixedFun(const T &x, RngEngine &rng, std::size_t size)
+    {
+        return x;
+    }
+}
+
+template<class T>
+typename Gen<T>::type fixed(const T &x)
+{
+    return boost::bind(detail::fixedFun, x, _1, _2);
+}
+
+namespace detail {
+    template<class T>
     std::vector<T> listOfFun(typename Gen<T>::type g, RngEngine &rng,
             std::size_t size)
     {
@@ -208,7 +222,7 @@ namespace detail {
 template<class T>
 typename Gen<std::vector<T> >::type listOf(typename Gen<T>::type g)
 {
-    return boost::bind(detail::listOfFun, g);
+    return boost::bind(detail::listOfFun, g, _1, _2);
 }
 
 namespace detail {
@@ -229,7 +243,7 @@ namespace detail {
 template<class T>
 typename Gen<std::vector<T> >::type listOf1(typename Gen<T>::type g)
 {
-    return boost::bind(detail::listOf1Fun, g);
+    return boost::bind(detail::listOf1Fun, g, _1, _2);
 }
 
 namespace detail {
@@ -249,7 +263,7 @@ template<class T>
 typename Gen<std::vector<T> >::type vectorOf(std::size_t n,
         typename Gen<T>::type g)
 {
-    return boost::bind(detail::vectorOfFun, n, g);
+    return boost::bind(detail::vectorOfFun, n, g, _1, _2);
 }
 
 

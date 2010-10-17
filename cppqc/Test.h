@@ -23,7 +23,7 @@ struct Result
 {
     ResultType result;
     std::size_t numTests;
-    std::map<std::string, std::size_t> labels;
+    std::multimap<std::size_t, std::string> labels;
 
     // only used if result is QC_FAILURE
     std::size_t numShrinks;
@@ -46,6 +46,37 @@ Result quickCheck(const Property &prop = Property(),
     return quickCheckOutput(prop, out, maxSuccess, maxDiscarded, maxSize);
 }
 
+namespace detail {
+    inline std::multimap<std::size_t, std::string> convertLabels(
+            const std::map<std::string, std::size_t> &labelsCollected)
+    {
+        std::multimap<std::size_t, std::string> labels;
+        for (std::map<std::string, std::size_t>::const_iterator it =
+                labelsCollected.begin(); it != labelsCollected.end(); ++it) {
+            labels.insert(std::make_pair(it->second, it->first));
+        }
+        return labels;
+    }
+
+    inline void outputLabels(std::ostream &out, std::size_t numSuccess,
+            const std::multimap<std::size_t, std::string> &labels)
+    {
+        std::size_t cnt = 20;
+        for (std::map<std::size_t, std::string>::const_reverse_iterator
+                it = labels.rbegin(); it != labels.rend(); --cnt, ++it) {
+            if (cnt == 0) {
+                out << "  ..." << std::endl;
+                break;
+            }
+
+            if (it->second != "") {
+                out << "  " << (100 * it->first / numSuccess) << "% "
+                    << it->second << std::endl;
+            }
+        }
+    }
+}
+
 template<class Property>
 Result quickCheckOutput(const Property &prop = Property(),
         std::ostream &out = std::cout,
@@ -59,17 +90,21 @@ Result quickCheckOutput(const Property &prop = Property(),
     if (maxSize == 0)
         maxSize = maxSuccess;
 
-    std::map<std::string, std::size_t> labels; // fixme
-    std::size_t numSuccess = 0, numDiscarded = 0;
-    RngEngine rng;
+    std::map<std::string, std::size_t> labelsCollected;
+    std::size_t numSuccess = 0, numDiscarded = 0, numTrivial = 0;
+    RngEngine rng(time(0));
     while (numSuccess < maxSuccess) {
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;
-            bool success = prop.test(rng, size);
+            typename Property::Input input = prop.generateInput(rng, size);
+            bool success = prop.checkInput(input);
+            if (prop.isTrivialForInput(input))
+                ++numTrivial;
+            ++labelsCollected[prop.classifyInput(input)];
+
             if (success) {
                 ++numSuccess;
                 out << '.' << std::flush;
-                // fixme - labels
             } else {
                 if (prop.expect()) {
                     out << "\n*** Failed! ";
@@ -77,45 +112,52 @@ Result quickCheckOutput(const Property &prop = Property(),
                     out << "\n+++ OK, failed as expected. ";
                 }
 
-                out << "Falsifiable (after test " << numSuccess + 1
-                    << ")..." << std::endl;
+                out << "Falsifiable after test " << numSuccess + 1
+                    << " for input:" << std::endl;
 
-                // fixme - do shrinking
-                // fixme - output the generated args
+                prop.printInput(out, input);
+                std::size_t numShrinks = prop.shrinkInput(out, input);
 
                 if (prop.expect()) {
                     Result ret;
                     ret.result = QC_FAILURE;
                     ret.numTests = numSuccess + 1;
-                    ret.labels = labels;
-                    ret.numShrinks = 0;
+                    ret.labels = detail::convertLabels(labelsCollected);
+                    ret.numShrinks = numShrinks;
                     ret.usedSize = size;
                     return ret;
                 } else {
                     Result ret;
                     ret.result = QC_SUCCESS;
                     ret.numTests = numSuccess + 1;
-                    ret.labels = labels;
+                    ret.labels = detail::convertLabels(labelsCollected);
                     return ret;
                 }
             }
         } catch (...) {
             out << 'x' << std::flush;
             if (++numDiscarded >= maxDiscarded) {
-                out << "\n*** Gave up! Passed only " << numSuccess << " tests"
+                out << "\n*** Gave up! Passed only " << numSuccess << " tests."
                     << std::endl;
 
                 Result ret;
                 ret.result = QC_GAVE_UP;
                 ret.numTests = numSuccess;
-                ret.labels = labels;
+                ret.labels = detail::convertLabels(labelsCollected);
                 return ret;
             }
         }
     }
 
+    std::multimap<std::size_t, std::string> labels =
+        detail::convertLabels(labelsCollected);
+
     if (prop.expect()) {
-        out << "\n+++ OK, passed " << numSuccess << " tests" << std::endl;
+        out << "\n+++ OK, passed " << numSuccess << " tests";
+        if (numTrivial != 0)
+            out << " (" << (100 * numTrivial / numSuccess) << "% trivial)";
+        out << '.' << std::endl;
+        detail::outputLabels(out, numSuccess, labels);
 
         Result ret;
         ret.result = QC_SUCCESS;
@@ -123,8 +165,12 @@ Result quickCheckOutput(const Property &prop = Property(),
         ret.labels = labels;
         return ret;
     } else {
-        out << "\n*** Failed! Passed " << numSuccess
-            << " tests (expected failure)" << std::endl;
+        out << "\n*** Failed! Expected failure but passed " << numSuccess
+            << " tests";
+        if (numTrivial != 0)
+            out << " (" << (100 * numTrivial / numSuccess) << "% trivial)";
+        out << '.' << std::endl;
+        detail::outputLabels(out, numSuccess, labels);
 
         Result ret;
         ret.result = QC_NO_EXPECTED_FAILURE;
