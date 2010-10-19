@@ -1,7 +1,7 @@
 #ifndef CPPQC_PROPERTY_H
 #define CPPQC_PROPERTY_H
 
-#include "Gen.h"
+#include "Generator.h"
 #include "Arbitrary.h"
 
 #include <stdexcept>
@@ -13,6 +13,8 @@ template<class T1>
 class Property
 {
     public:
+        Property(const Generator<T1> &g1 = Arbitrary<T1>()) : m_gen1(g1) {}
+
         virtual bool expect() const;
         virtual std::string name() const;
 
@@ -23,7 +25,7 @@ class Property
 
         Input generateInput(RngEngine &rng, std::size_t size) const
         {
-            return Input(generator1()(rng, size));
+            return Input(m_gen1.unGen(rng, size));
         }
 
         bool checkInput(const Input &input) const
@@ -46,34 +48,27 @@ class Property
             out << "  1: " << input.x1 << std::endl;
         }
 
-        std::size_t shrinkInput(std::ostream &out, const Input &input) const
+        std::pair<std::size_t, Input> shrinkInput(const Input &input) const
         {
             std::size_t numShrinks = 0;
-            try {
-                Input shrunk = input;
+            Input shrunk = input;
 
 continueShrinking:
-                out << "Shrinking..." << std::flush;
 
-                std::vector<T1> xshr1 = shrink1()(shrunk.x1);
+            try {
+                std::vector<T1> xshr1 = m_gen1.shrink(shrunk.x1);
                 for (typename std::vector<T1>::const_iterator it = xshr1.begin();
                         it != xshr1.end(); ++it) {
                     Input inTest(*it);
                     if (!checkInput(inTest)) {
                         shrunk = inTest;
-                        out << "Found shrunk input:" << std::endl;
-                        printInput(out, shrunk);
+                        numShrinks++;
                         goto continueShrinking;
                     }
                 }
-
-                out << "Could not shrink any farther (Shrunk "
-                    << numShrinks << " times)." << std::endl;
             } catch (...) {
-                out << "Caught exception while generating shrinks (Shrunk "
-                    << numShrinks << " times)!" << std::endl;
             }
-            return numShrinks;
+            return std::make_pair(numShrinks, shrunk);
         }
 
     private:
@@ -81,8 +76,7 @@ continueShrinking:
         virtual bool isTrivialFor(const T1 &) const;
         virtual std::string classify(const T1 &) const;
 
-        virtual typename Gen<T1>::type generator1() const;
-        virtual typename Shrink<T1>::type shrink1() const;
+        Generator<T1> m_gen1;
 };
 
 template<class T1>
@@ -95,18 +89,6 @@ template<class T1>
 std::string Property<T1>::name() const
 {
     return typeid(*this).name();
-}
-
-template<class T1>
-typename Gen<T1>::type Property<T1>::generator1() const
-{
-    return Arbitrary<T1>::generator;
-}
-
-template<class T1>
-typename Shrink<T1>::type Property<T1>::shrink1() const
-{
-    return Arbitrary<T1>::shrink;
 }
 
 template<class T1>

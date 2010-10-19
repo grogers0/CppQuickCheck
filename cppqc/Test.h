@@ -83,7 +83,7 @@ Result quickCheckOutput(const Property &prop = Property(),
         std::size_t maxSuccess = 100,
         std::size_t maxDiscarded = 0, std::size_t maxSize = 0)
 {
-    out << "* Checking property " << prop.name() << " " << std::flush;
+    out << "* Checking property " << prop.name() << "..." << std::endl;
 
     if (maxDiscarded == 0)
         maxDiscarded = maxSuccess * 5;
@@ -97,26 +97,44 @@ Result quickCheckOutput(const Property &prop = Property(),
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;
             typename Property::Input input = prop.generateInput(rng, size);
-            bool success = prop.checkInput(input);
+            bool success;
+            try {
+                success = prop.checkInput(input);
+            } catch (...) {
+                out << "Caught exception checking property...\n";
+                success = false;
+            }
             if (prop.isTrivialForInput(input))
                 ++numTrivial;
             ++labelsCollected[prop.classifyInput(input)];
 
             if (success) {
                 ++numSuccess;
-                out << '.' << std::flush;
             } else {
                 if (prop.expect()) {
-                    out << "\n*** Failed! ";
+                    out << "*** Failed! ";
                 } else {
-                    out << "\n+++ OK, failed as expected. ";
+                    out << "+++ OK, failed as expected. ";
                 }
 
-                out << "Falsifiable after test " << numSuccess + 1
-                    << " for input:" << std::endl;
+                out << "Falsifiable after " << numSuccess + 1
+                    << (numSuccess == 0 ? " test" : " tests");
 
-                prop.printInput(out, input);
-                std::size_t numShrinks = prop.shrinkInput(out, input);
+                std::size_t numShrinks = 0;
+                try {
+                    std::pair<std::size_t, typename Property::Input> shrinkRes =
+                        prop.shrinkInput(input);
+                    numShrinks = shrinkRes.first;
+                    if (numShrinks > 0) {
+                        out << " and " << numShrinks
+                            << (numShrinks == 1 ? " shrink" : " shrinks");
+                    }
+                    out << " for input:" << std::endl;
+                    prop.printInput(out, shrinkRes.second);
+                } catch (...) {
+                    out << " for input:" << std::endl;
+                    prop.printInput(out, input);
+                }
 
                 if (prop.expect()) {
                     Result ret;
@@ -135,9 +153,8 @@ Result quickCheckOutput(const Property &prop = Property(),
                 }
             }
         } catch (...) {
-            out << 'x' << std::flush;
             if (++numDiscarded >= maxDiscarded) {
-                out << "\n*** Gave up! Passed only " << numSuccess << " tests."
+                out << "*** Gave up! Passed only " << numSuccess << " tests."
                     << std::endl;
 
                 Result ret;
@@ -153,7 +170,7 @@ Result quickCheckOutput(const Property &prop = Property(),
         detail::convertLabels(labelsCollected);
 
     if (prop.expect()) {
-        out << "\n+++ OK, passed " << numSuccess << " tests";
+        out << "+++ OK, passed " << numSuccess << " tests";
         if (numTrivial != 0)
             out << " (" << (100 * numTrivial / numSuccess) << "% trivial)";
         out << '.' << std::endl;
@@ -165,7 +182,7 @@ Result quickCheckOutput(const Property &prop = Property(),
         ret.labels = labels;
         return ret;
     } else {
-        out << "\n*** Failed! Expected failure but passed " << numSuccess
+        out << "*** Failed! Expected failure but passed " << numSuccess
             << " tests";
         if (numTrivial != 0)
             out << " (" << (100 * numTrivial / numSuccess) << "% trivial)";

@@ -1,7 +1,7 @@
 #ifndef CPPQC_ARBITRARY_H
 #define CPPQC_ARBITRARY_H
 
-#include "Gen.h"
+#include "Generator.h"
 
 #include <vector>
 #include <limits>
@@ -88,33 +88,32 @@ std::vector<Real> shrinkReal(Real x)
 template<class T>
 struct Arbitrary
 {
-    static const typename Gen<T>::type generator;
-    static const typename Shrink<T>::type shrink;
-};
+    typedef boost::function<T (RngEngine &, std::size_t)> unGenType;
+    typedef boost::function<std::vector<T> (T)> shrinkType;
 
-template<class T>
-T arbitraryThrow(RngEngine &, std::size_t)
-{
-    throw std::logic_error("no default generator");
-}
+    static const unGenType unGen;
+    static const shrinkType shrink;
+};
 
 /*
  * specialize ArbitraryImpl and implement the members:
- *     static const Gen<T>::type generator;
- *     static const Shrink<T>::type shrink;
+ *     static const Arbitrary<T>::unGenType unGen;
+ *     static const Arbitrary<T>::shrinkType shrink;
  */
 template<class T>
 struct ArbitraryImpl
 {
     // no default implementation - users must specialize ArbitraryImpl
-    // and give an implementation of generator and shrink. If they do not
+    // and give an implementation of unGen and shrink. If they do not
     // and they try to use Arbitrary<TheirClass>, a compile error will result.
 };
 
 template<class T>
-const typename Gen<T>::type Arbitrary<T>::generator = ArbitraryImpl<T>::generator;
+const typename Arbitrary<T>::unGenType Arbitrary<T>::unGen =
+ArbitraryImpl<T>::unGen;
 template<class T>
-const typename Shrink<T>::type Arbitrary<T>::shrink = ArbitraryImpl<T>::shrink;
+const typename Arbitrary<T>::shrinkType Arbitrary<T>::shrink =
+ArbitraryImpl<T>::shrink;
 
 // included specializations
 
@@ -133,17 +132,17 @@ inline std::vector<bool> shrinkBool(bool x)
 template<>
 struct ArbitraryImpl<bool>
 {
-    static const Gen<bool>::type generator;
-    static const Shrink<bool>::type shrink;
+    static const Arbitrary<bool>::unGenType unGen;
+    static const Arbitrary<bool>::shrinkType shrink;
 };
-const Gen<bool>::type ArbitraryImpl<bool>::generator = arbitraryBool;
-const Shrink<bool>::type ArbitraryImpl<bool>::shrink = shrinkBool;
+const Arbitrary<bool>::unGenType ArbitraryImpl<bool>::unGen = arbitraryBool;
+const Arbitrary<bool>::shrinkType ArbitraryImpl<bool>::shrink = shrinkBool;
 
 template<class T1, class T2>
 std::pair<T1, T2> arbitraryPair(RngEngine &rng, std::size_t size)
 {
-    return std::pair<T1, T2>(Arbitrary<T1>::generator(rng, size),
-            Arbitrary<T2>::generator(rng, size));
+    return std::pair<T1, T2>(Arbitrary<T1>::unGen(rng, size),
+            Arbitrary<T2>::unGen(rng, size));
 }
 template<class T1, class T2>
 std::vector<std::pair<T1, T2> > shrinkPair(const std::pair<T1, T2> &x)
@@ -164,135 +163,141 @@ std::vector<std::pair<T1, T2> > shrinkPair(const std::pair<T1, T2> &x)
 template<class T1, class T2>
 struct ArbitraryImpl<std::pair<T1, T2> >
 {
-    static const typename Gen<std::pair<T1, T2> >::type generator;
-    static const typename Shrink<std::pair<T1, T2> >::type shrink;
+    static const typename Arbitrary<std::pair<T1, T2> >::unGenType unGen;
+    static const typename Arbitrary<std::pair<T1, T2> >::shrinkType shrink;
 };
 template<class T1, class T2>
-const typename Gen<std::pair<T1, T2> >::type
-ArbitraryImpl<std::pair<T1, T2> >::generator = arbitraryPair<T1, T2>;
+const typename Arbitrary<std::pair<T1, T2> >::unGenType
+ArbitraryImpl<std::pair<T1, T2> >::unGen = arbitraryPair<T1, T2>;
 template<class T1, class T2>
-const typename Shrink<std::pair<T1, T2> >::type
+const typename Arbitrary<std::pair<T1, T2> >::shrinkType
 ArbitraryImpl<std::pair<T1, T2> >::shrink = shrinkPair<T1, T2>;
 
 template<>
 struct ArbitraryImpl<signed char>
 {
-    static const Gen<signed char>::type generator;
-    static const Shrink<signed char>::type shrink;
+    static const Arbitrary<signed char>::unGenType unGen;
+    static const Arbitrary<signed char>::shrinkType shrink;
 };
-const Gen<signed char>::type ArbitraryImpl<signed char>::generator =
+const Arbitrary<signed char>::unGenType ArbitraryImpl<signed char>::unGen =
 arbitrarySizedBoundedIntegral<signed char>;
-const Shrink<signed char>::type ArbitraryImpl<signed char>::shrink =
+const Arbitrary<signed char>::shrinkType ArbitraryImpl<signed char>::shrink =
 shrinkIntegral<signed char>;
 
 template<>
 struct ArbitraryImpl<unsigned char>
 {
-    static const Gen<unsigned char>::type generator;
-    static const Shrink<unsigned char>::type shrink;
+    static const Arbitrary<unsigned char>::unGenType unGen;
+    static const Arbitrary<unsigned char>::shrinkType shrink;
 };
-const Gen<unsigned char>::type ArbitraryImpl<unsigned char>::generator =
+const Arbitrary<unsigned char>::unGenType ArbitraryImpl<unsigned char>::unGen =
 arbitrarySizedBoundedIntegral<unsigned char>;
-const Shrink<unsigned char>::type ArbitraryImpl<unsigned char>::shrink =
-shrinkIntegral<unsigned char>;
+const Arbitrary<unsigned char>::shrinkType
+ArbitraryImpl<unsigned char>::shrink = shrinkIntegral<unsigned char>;
 
 template<>
 struct ArbitraryImpl<signed short>
 {
-    static const Gen<signed short>::type generator;
-    static const Shrink<signed short>::type shrink;
+    static const Arbitrary<signed short>::unGenType unGen;
+    static const Arbitrary<signed short>::shrinkType shrink;
 };
-const Gen<signed short>::type ArbitraryImpl<signed short>::generator =
+const Arbitrary<signed short>::unGenType ArbitraryImpl<signed short>::unGen =
 arbitrarySizedBoundedIntegral<signed short>;
-const Shrink<signed short>::type ArbitraryImpl<signed short>::shrink =
+const Arbitrary<signed short>::shrinkType ArbitraryImpl<signed short>::shrink =
 shrinkIntegral<signed short>;
 
 template<>
 struct ArbitraryImpl<unsigned short>
 {
-    static const Gen<unsigned short>::type generator;
-    static const Shrink<unsigned short>::type shrink;
+    static const Arbitrary<unsigned short>::unGenType unGen;
+    static const Arbitrary<unsigned short>::shrinkType shrink;
 };
-const Gen<unsigned short>::type ArbitraryImpl<unsigned short>::generator =
+const Arbitrary<unsigned short>::unGenType
+ArbitraryImpl<unsigned short>::unGen =
 arbitrarySizedBoundedIntegral<unsigned short>;
-const Shrink<unsigned short>::type ArbitraryImpl<unsigned short>::shrink =
-shrinkIntegral<unsigned short>;
+const Arbitrary<unsigned short>::shrinkType
+ArbitraryImpl<unsigned short>::shrink = shrinkIntegral<unsigned short>;
 
 template<>
 struct ArbitraryImpl<signed int>
 {
-    static const Gen<signed int>::type generator;
-    static const Shrink<signed int>::type shrink;
+    static const Arbitrary<signed int>::unGenType unGen;
+    static const Arbitrary<signed int>::shrinkType shrink;
 };
-const Gen<signed int>::type ArbitraryImpl<signed int>::generator =
+const Arbitrary<signed int>::unGenType ArbitraryImpl<signed int>::unGen =
 arbitrarySizedBoundedIntegral<signed int>;
-const Shrink<signed int>::type ArbitraryImpl<signed int>::shrink =
+const Arbitrary<signed int>::shrinkType ArbitraryImpl<signed int>::shrink =
 shrinkIntegral<signed int>;
 
 template<>
 struct ArbitraryImpl<unsigned int>
 {
-    static const Gen<unsigned int>::type generator;
-    static const Shrink<unsigned int>::type shrink;
+    static const Arbitrary<unsigned int>::unGenType unGen;
+    static const Arbitrary<unsigned int>::shrinkType shrink;
 };
-const Gen<unsigned int>::type ArbitraryImpl<unsigned int>::generator =
+const Arbitrary<unsigned int>::unGenType ArbitraryImpl<unsigned int>::unGen =
 arbitrarySizedBoundedIntegral<unsigned int>;
-const Shrink<unsigned int>::type ArbitraryImpl<unsigned int>::shrink =
+const Arbitrary<unsigned int>::shrinkType ArbitraryImpl<unsigned int>::shrink =
 shrinkIntegral<unsigned int>;
 
 template<>
 struct ArbitraryImpl<signed long>
 {
-    static const Gen<signed long>::type generator;
-    static const Shrink<signed long>::type shrink;
+    static const Arbitrary<signed long>::unGenType unGen;
+    static const Arbitrary<signed long>::shrinkType shrink;
 };
-const Gen<signed long>::type ArbitraryImpl<signed long>::generator =
+const Arbitrary<signed long>::unGenType ArbitraryImpl<signed long>::unGen =
 arbitrarySizedBoundedIntegral<signed long>;
-const Shrink<signed long>::type ArbitraryImpl<signed long>::shrink =
+const Arbitrary<signed long>::shrinkType ArbitraryImpl<signed long>::shrink =
 shrinkIntegral<signed long>;
 
 template<>
 struct ArbitraryImpl<unsigned long>
 {
-    static const Gen<unsigned long>::type generator;
-    static const Shrink<unsigned long>::type shrink;
+    static const Arbitrary<unsigned long>::unGenType unGen;
+    static const Arbitrary<unsigned long>::shrinkType shrink;
 };
-const Gen<unsigned long>::type ArbitraryImpl<unsigned long>::generator =
+const Arbitrary<unsigned long>::unGenType ArbitraryImpl<unsigned long>::unGen =
 arbitrarySizedBoundedIntegral<unsigned long>;
-const Shrink<unsigned long>::type ArbitraryImpl<unsigned long>::shrink =
+const Arbitrary<unsigned long>::shrinkType ArbitraryImpl<unsigned long>::shrink =
 shrinkIntegral<unsigned long>;
 
 template<>
 struct ArbitraryImpl<float>
 {
-    static const Gen<float>::type generator;
-    static const Shrink<float>::type shrink;
+    static const Arbitrary<float>::unGenType unGen;
+    static const Arbitrary<float>::shrinkType shrink;
 };
-const Gen<float>::type ArbitraryImpl<float>::generator =
+const Arbitrary<float>::unGenType ArbitraryImpl<float>::unGen =
 arbitrarySizedReal<float>;
-const Shrink<float>::type ArbitraryImpl<float>::shrink = shrinkReal<float>;
+const Arbitrary<float>::shrinkType ArbitraryImpl<float>::shrink = shrinkReal<float>;
 
 template<>
 struct ArbitraryImpl<double>
 {
-    static const Gen<double>::type generator;
-    static const Shrink<double>::type shrink;
+    static const Arbitrary<double>::unGenType unGen;
+    static const Arbitrary<double>::shrinkType shrink;
 };
-const Gen<double>::type ArbitraryImpl<double>::generator =
+const Arbitrary<double>::unGenType ArbitraryImpl<double>::unGen =
 arbitrarySizedReal<double>;
-const Shrink<double>::type ArbitraryImpl<double>::shrink = shrinkReal<double>;
+const Arbitrary<double>::shrinkType ArbitraryImpl<double>::shrink = shrinkReal<double>;
 
 template<>
 struct ArbitraryImpl<long double>
 {
-    static const Gen<long double>::type generator;
-    static const Shrink<long double>::type shrink;
+    static const Arbitrary<long double>::unGenType unGen;
+    static const Arbitrary<long double>::shrinkType shrink;
 };
-const Gen<long double>::type ArbitraryImpl<long double>::generator =
+const Arbitrary<long double>::unGenType ArbitraryImpl<long double>::unGen =
 arbitrarySizedReal<long double>;
-const Shrink<long double>::type ArbitraryImpl<long double>::shrink =
+const Arbitrary<long double>::shrinkType ArbitraryImpl<long double>::shrink =
 shrinkReal<long double>;
 
+inline char arbitraryChar(RngEngine &rng, std::size_t)
+{
+    boost::uniform_int<char> dist(0x20, 0x7f);
+    return dist(rng);
+}
 inline std::vector<char> shrinkChar(char c)
 {
     char possShrinks[] = {'a', 'b', 'c', 'A', 'B', 'C', '1', '2', '3', ' ',
@@ -311,17 +316,11 @@ inline std::vector<char> shrinkChar(char c)
 template<>
 struct ArbitraryImpl<char>
 {
-    static const Gen<char>::type generator;
-    static const Shrink<char>::type shrink;
+    static const Arbitrary<char>::unGenType unGen;
+    static const Arbitrary<char>::shrinkType shrink;
 };
-const Gen<char>::type ArbitraryImpl<char>::generator = choose<char>(0, 127);
-const Shrink<char>::type ArbitraryImpl<char>::shrink = shrinkChar;
-
-template<class T>
-typename Gen<std::vector<T> >::type vector(std::size_t n)
-{
-    return vectorOf(n, Arbitrary<T>::generator);
-}
+const Arbitrary<char>::unGenType ArbitraryImpl<char>::unGen = arbitraryChar;
+const Arbitrary<char>::shrinkType ArbitraryImpl<char>::shrink = shrinkChar;
 
 }
 
