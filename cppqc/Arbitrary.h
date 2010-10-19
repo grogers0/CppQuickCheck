@@ -138,41 +138,6 @@ struct ArbitraryImpl<bool>
 const Arbitrary<bool>::unGenType ArbitraryImpl<bool>::unGen = arbitraryBool;
 const Arbitrary<bool>::shrinkType ArbitraryImpl<bool>::shrink = shrinkBool;
 
-template<class T1, class T2>
-std::pair<T1, T2> arbitraryPair(RngEngine &rng, std::size_t size)
-{
-    return std::pair<T1, T2>(Arbitrary<T1>::unGen(rng, size),
-            Arbitrary<T2>::unGen(rng, size));
-}
-template<class T1, class T2>
-std::vector<std::pair<T1, T2> > shrinkPair(const std::pair<T1, T2> &x)
-{
-    std::vector<T1> shrinks1 = Arbitrary<T1>::shrink(x.first);
-    std::vector<T2> shrinks2 = Arbitrary<T2>::shrink(x.second);
-    std::vector<std::pair<T1, T2> > ret;
-    for (typename std::vector<T1>::const_iterator it = shrinks1.begin();
-            it != shrinks1.end(); ++it) {
-        ret.push_back(std::make_pair(*it, x.second));
-    }
-    for (typename std::vector<T2>::const_iterator it = shrinks2.begin();
-            it != shrinks2.end(); ++it) {
-        ret.push_back(std::make_pair(x.first, *it));
-    }
-    return ret;
-}
-template<class T1, class T2>
-struct ArbitraryImpl<std::pair<T1, T2> >
-{
-    static const typename Arbitrary<std::pair<T1, T2> >::unGenType unGen;
-    static const typename Arbitrary<std::pair<T1, T2> >::shrinkType shrink;
-};
-template<class T1, class T2>
-const typename Arbitrary<std::pair<T1, T2> >::unGenType
-ArbitraryImpl<std::pair<T1, T2> >::unGen = arbitraryPair<T1, T2>;
-template<class T1, class T2>
-const typename Arbitrary<std::pair<T1, T2> >::shrinkType
-ArbitraryImpl<std::pair<T1, T2> >::shrink = shrinkPair<T1, T2>;
-
 template<>
 struct ArbitraryImpl<signed char>
 {
@@ -300,8 +265,8 @@ inline char arbitraryChar(RngEngine &rng, std::size_t)
 }
 inline std::vector<char> shrinkChar(char c)
 {
-    char possShrinks[] = {'a', 'b', 'c', 'A', 'B', 'C', '1', '2', '3', ' ',
-        '\n'};
+    const char possShrinks[] = {'a', 'b', 'c', 'A', 'B', 'C', '1', '2', '3',
+        ' ', '\n', '\0'};
     std::vector<char> ret;
     for (std::size_t i = 0; i < sizeof(possShrinks); ++i) {
         if (possShrinks[i] < c)
@@ -321,6 +286,97 @@ struct ArbitraryImpl<char>
 };
 const Arbitrary<char>::unGenType ArbitraryImpl<char>::unGen = arbitraryChar;
 const Arbitrary<char>::shrinkType ArbitraryImpl<char>::shrink = shrinkChar;
+
+template<>
+struct ArbitraryImpl<wchar_t>
+{
+    static const Arbitrary<wchar_t>::unGenType unGen;
+    static const Arbitrary<wchar_t>::shrinkType shrink;
+};
+const Arbitrary<wchar_t>::unGenType ArbitraryImpl<wchar_t>::unGen =
+arbitraryBoundedIntegral<wchar_t>;
+const Arbitrary<wchar_t>::shrinkType ArbitraryImpl<wchar_t>::shrink =
+shrinkIntegral<wchar_t>;
+
+template<class String>
+String arbitraryString(RngEngine &rng, std::size_t size)
+{
+    boost::uniform_int<std::size_t> dist(0, size);
+    std::size_t n = dist(rng);
+    String ret;
+    ret.reserve(n);
+    while (n-- > 0)
+        ret.push_back(Arbitrary<typename String::value_type>::unGen(rng, size));
+    return ret;
+}
+template<class String>
+std::vector<String> shrinkString(const String &x)
+{
+    std::vector<String> ret;
+    ret.reserve(x.size());
+    for (typename String::const_iterator it = x.begin(); it != x.end(); ++it) {
+        ret.push_back(String());
+        ret.back().reserve(x.size() - 1);
+        ret.back().insert(ret.back().end(), x.begin(), it);
+        ret.back().insert(ret.back().end(), it + 1, x.end());
+    }
+    return ret;
+}
+template<class CharT, class Traits, class Alloc>
+struct ArbitraryImpl<std::basic_string<CharT, Traits, Alloc> >
+{
+    static const typename
+        Arbitrary<std::basic_string<CharT, Traits, Alloc> >::unGenType unGen;
+    static const typename
+        Arbitrary<std::basic_string<CharT, Traits, Alloc> >::shrinkType shrink;
+};
+template<class CharT, class Traits, class Alloc>
+const typename Arbitrary<std::basic_string<CharT, Traits, Alloc> >::unGenType
+ArbitraryImpl<std::basic_string<CharT, Traits, Alloc> >::unGen =
+arbitraryString<std::basic_string<CharT, Traits, Alloc> >;
+template<class CharT, class Traits, class Alloc>
+const typename Arbitrary<std::basic_string<CharT, Traits, Alloc> >::shrinkType
+ArbitraryImpl<std::basic_string<CharT, Traits, Alloc> >::shrink =
+shrinkString<std::basic_string<CharT, Traits, Alloc> >;
+
+template<class PairType>
+PairType arbitraryPair(RngEngine &rng, std::size_t size)
+{
+    return PairType(Arbitrary<typename PairType::first_type>::unGen(rng, size),
+            Arbitrary<typename PairType::second_type>::unGen(rng, size));
+}
+template<class PairType>
+std::vector<PairType> shrinkPair(const PairType &x)
+{
+    typedef typename PairType::first_type FirstType;
+    typedef typename PairType::second_type SecondType;
+    std::vector<FirstType> shrinks1 = Arbitrary<FirstType>::shrink(x.first);
+    std::vector<SecondType> shrinks2 = Arbitrary<SecondType>::shrink(x.second);
+    std::vector<PairType> ret;
+    ret.reserve(shrinks1.size() + shrinks2.size());
+    for (typename std::vector<FirstType>::const_iterator it = shrinks1.begin();
+            it != shrinks1.end(); ++it) {
+        ret.push_back(PairType(*it, x.second));
+    }
+    for (typename std::vector<SecondType>::const_iterator it = shrinks2.begin();
+            it != shrinks2.end(); ++it) {
+        ret.push_back(PairType(x.first, *it));
+    }
+    return ret;
+}
+template<class T1, class T2>
+struct ArbitraryImpl<std::pair<T1, T2> >
+{
+    static const typename Arbitrary<std::pair<T1, T2> >::unGenType unGen;
+    static const typename Arbitrary<std::pair<T1, T2> >::shrinkType shrink;
+};
+template<class T1, class T2>
+const typename Arbitrary<std::pair<T1, T2> >::unGenType
+ArbitraryImpl<std::pair<T1, T2> >::unGen = arbitraryPair<std::pair<T1, T2> >;
+template<class T1, class T2>
+const typename Arbitrary<std::pair<T1, T2> >::shrinkType
+ArbitraryImpl<std::pair<T1, T2> >::shrink = shrinkPair<std::pair<T1, T2> >;
+
 
 }
 
