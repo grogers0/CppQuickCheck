@@ -238,6 +238,99 @@ class Generator
 };
 
 
+/// Generates some example values and returns them.
+template<class T>
+std::vector<T> sample(const Generator<T> &g, std::size_t num = 0,
+        std::size_t seed = 0)
+{
+    if (num == 0)
+        num = 20;
+    if (seed == 0)
+        seed = time(0);
+    RngEngine rng(seed);
+    std::vector<T> ret;
+    ret.reserve(num);
+    try {
+        for (std::size_t i = 0; i < num; ++i)
+            ret.push_back(g.unGen(rng, i));
+    } catch (...) {
+    }
+    return ret;
+}
+
+/// Generates some example values and prints them.
+template<class T>
+void sampleOutput(const Generator<T> &g,
+        std::ostream &out = std::cout, std::size_t num = 0,
+        std::size_t seed = 0)
+{
+    if (num == 0)
+        num = 20;
+    if (seed == 0)
+        seed = time(0);
+    RngEngine rng(seed);
+    try {
+        for (std::size_t i = 0; i < num; ++i) {
+            if (i != 0)
+                out << ' ';
+            out << g.unGen(rng, i);
+        }
+    } catch (...) {
+    }
+    out << std::endl;
+}
+
+/// Generates some example values, then generates a list of possible shrinks
+/// for each value and returns both the value and the shrinks.
+template<class T>
+std::vector<std::pair<T, std::vector<T> > > sampleShrink(const Generator<T> &g,
+        std::size_t num = 0, std::size_t seed = 0)
+{
+    if (num == 0)
+        num = 20;
+    if (seed == 0)
+        seed = time(0);
+    RngEngine rng(seed);
+    std::vector<std::pair<T, std::vector<T> > > ret;
+    ret.reserve(num);
+    try {
+        for (std::size_t i = 0; i < num; ++i) {
+            T x = g.unGen(rng, i);
+            ret.push_back(std::make_pair(x, g.shrink(x)));
+        }
+    } catch (...) {
+    }
+    return ret;
+}
+
+/// Outputs some example values from a generator. For each value, outputs
+/// several possible shrinks of that value.
+template<class T>
+void sampleShrinkOutput(const Generator<T> &g, std::ostream &out,
+        std::size_t num = 0, bool randomized = false, std::size_t seed = 0)
+{
+    if (num == 0)
+        num = 20;
+    if (seed == 0)
+        seed = time(0);
+    RngEngine rng(seed);
+    try {
+        for (std::size_t i = 0; i < num; ++i) {
+            T x = g.unGen(rng, i);
+            std::vector<T> shr = g.shrink(x);
+            if (randomized)
+                std::random_shuffle(shr.begin(), shr.end());
+            out << x << " ->";
+            for (std::size_t j = 0; j < num && j < shr.size(); ++j)
+                out << ' ' << shr[j];
+            out << '\n';
+        }
+    } catch (...) {
+    }
+    out << std::flush;
+}
+
+
 // generator combinators
 
 namespace detail {
@@ -383,41 +476,6 @@ template<class Integer>
 StatelessGenerator<Integer> choose(Integer min, Integer max)
 {
     return detail::ChooseStatelessGenerator<Integer>(min, max);
-}
-
-
-/// Generates some example values and returns them.
-template<class T>
-std::vector<T> sample(const Generator<T> &g, std::size_t num = 0,
-        std::size_t seed = time(0))
-{
-    if (num == 0)
-        num = 20;
-    RngEngine rng(seed);
-    std::vector<T> ret;
-    ret.reserve(num);
-    try {
-        for (std::size_t i = 0; i < num; ++i)
-            ret.push_back(g.unGen(rng, i));
-    } catch (...) {
-    }
-    return ret;
-}
-
-/// Generates some example values and prints them.
-template<class T>
-void sampleOutput(const Generator<T> &g,
-        std::ostream &out = std::cout, std::size_t num = 0,
-        std::size_t seed = time(0))
-{
-    if (num == 0)
-        num = 20;
-    RngEngine rng(seed);
-    try {
-        for (std::size_t i = 0; i < num; ++i)
-            out << g.unGen(rng, i) << '\n';
-    } catch (...) {
-    }
 }
 
 
