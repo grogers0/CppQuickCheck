@@ -12,29 +12,31 @@ namespace cppqc {
 
 typedef boost::mt19937 RngEngine;
 
-// When creating user defined generators, they must model a
-// "GeneratorConcept<T>", that is, they must have two member functions
-// compatible with the following signatures:
-//
-//      T unGen(RngEngine &, std::size_t);
-//      std::vector<T> shrink(const T &);
-//
-// The unGen function generates a new value, and the shrink function shrinks
-// the last previously generated value down - generating an std::vector<T> of
-// possible alternative shrinks. It possible to create a stateful generator
-// modelling GenConcept, which in the generator stores some state in unGen that
-// is looked up when calling shrink. Note however that the shrink function may
-// be called multiple times, the subsequent calls may be called with the
-// argument being one of the values returned by the previous call to shrink.
-// This limits the types of statefulness possible.
-
-// GeneratorConcept<T>:
-//      T unGen(RngEngine &, std::size_t);
-//      std::vector<T> shrink(const T &);
-//
-// StatelessGeneratorConcept<T> (also models GeneratorConcept<T>):
-//      T unGen(RngEngine &, std::size_t) const;
-//      std::vector<T> shrink(const T &) const;
+/*
+ * When creating user defined generators, they must model a
+ * "GeneratorConcept<T>", that is, they must be copy-constructable and have
+ * member functions compatible with the following signatures:
+ * 
+ *      T unGen(RngEngine &, std::size_t);
+ *      std::vector<T> shrink(const T &);
+ * 
+ * The unGen function generates a new value, and the shrink function shrinks
+ * the last previously generated value down - generating an std::vector<T> of
+ * possible alternative shrinks. It possible to create a stateful generator
+ * modelling GenConcept, which in the generator stores some state in unGen that
+ * is looked up when calling shrink. Note however that the shrink function may
+ * be called multiple times, the subsequent calls may be called with the
+ * argument being one of the values returned by the previous call to shrink.
+ * This limits the types of statefulness possible.
+ * 
+ * GeneratorConcept<T>:
+ *      T unGen(RngEngine &, std::size_t);
+ *      std::vector<T> shrink(const T &);
+ * 
+ * StatelessGeneratorConcept<T> (also models GeneratorConcept<T>):
+ *      T unGen(RngEngine &, std::size_t) const;
+ *      std::vector<T> shrink(const T &) const;
+ */
 
 
 namespace detail {
@@ -332,6 +334,67 @@ void sampleShrinkOutput(const Generator<T> &g, std::ostream &out,
 
 
 // generator combinators
+
+namespace detail {
+    template<class T>
+    class NoShrinkGenerator
+    {
+        public:
+            NoShrinkGenerator(const Generator<T> &g) :
+                m_gen(g)
+            {
+            }
+
+            T unGen(RngEngine &rng, std::size_t size)
+            {
+                return m_gen.unGen(rng, size);
+            }
+
+            std::vector<T> shrink(const T &x)
+            {
+                return std::vector<T>();
+            }
+
+        private:
+            Generator<T> m_gen;
+    };
+
+    template<class T>
+    class NoShrinkStatelessGenerator
+    {
+        public:
+            NoShrinkStatelessGenerator(const Generator<T> &g) :
+                m_gen(g)
+            {
+            }
+
+            T unGen(RngEngine &rng, std::size_t size)
+            {
+                return m_gen.unGen(rng, size);
+            }
+
+            std::vector<T> shrink(const T &x)
+            {
+                return std::vector<T>();
+            }
+
+        private:
+            StatelessGenerator<T> m_gen;
+    };
+}
+
+// Generates a value the same way as the input generator, but doesn't shrink.
+template<class T>
+Generator<T> noShrink(const Generator<T> &g)
+{
+    return detail::NoShrinkGenerator<T>(g);
+}
+template<class T>
+StatelessGenerator<T> noShrink(const StatelessGenerator<T> &g)
+{
+    return detail::NoShrinkStatelessGenerator<T>(g);
+}
+
 
 namespace detail {
     template<class T>
