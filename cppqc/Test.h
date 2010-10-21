@@ -37,8 +37,8 @@ namespace detail {
     };
 }
 
-template<class Property>
-Result quickCheck(const Property &prop = Property(),
+template<class Prop>
+Result quickCheck(const Prop &prop = Prop(),
         std::size_t maxSuccess = 100, std::size_t maxDiscarded = 0,
         std::size_t maxSize = 0)
 {
@@ -75,15 +75,38 @@ namespace detail {
             }
         }
     }
+
+    template<class Prop>
+    std::pair<std::size_t, typename Prop::Input>
+    doShrink(const Prop &prop, const typename Prop::Input &in)
+    {
+        std::size_t numShrinks = 0;
+        typename Prop::Input shrunk = in;
+
+        try {
+continueShrinking:
+            std::vector<typename Prop::Input> shrinks = prop.shrink__(shrunk);
+            for (typename std::vector<typename Prop::Input>::const_iterator
+                    it = shrinks.begin(); it != shrinks.end(); ++it) {
+                if (!prop.check__(*it)) {
+                    shrunk = *it;
+                    numShrinks++;
+                    goto continueShrinking;
+                }
+            }
+        } catch (...) {
+        }
+        return std::make_pair(numShrinks, shrunk);
+    }
 }
 
-template<class Property>
-Result quickCheckOutput(const Property &prop = Property(),
+template<class Prop>
+Result quickCheckOutput(const Prop &prop = Prop(),
         std::ostream &out = std::cout,
         std::size_t maxSuccess = 100,
         std::size_t maxDiscarded = 0, std::size_t maxSize = 0)
 {
-    out << "* Checking property " << prop.name() << "..." << std::endl;
+    out << "* Checking property \"" << prop.name__() << "\" ..." << std::endl;
 
     if (maxDiscarded == 0)
         maxDiscarded = maxSuccess * 5;
@@ -96,22 +119,22 @@ Result quickCheckOutput(const Property &prop = Property(),
     while (numSuccess < maxSuccess) {
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;
-            typename Property::Input input = prop.generateInput(rng, size);
-            bool success;
+            typename Prop::Input in = prop.generate__(rng, size);
+            bool success = false;
             try {
-                success = prop.checkInput(input);
+                success = prop.check__(in);
             } catch (...) {
                 out << "Caught exception checking property...\n";
-                success = false;
             }
-            if (prop.isTrivialForInput(input))
+
+            if (prop.trivial__(in))
                 ++numTrivial;
-            ++labelsCollected[prop.classifyInput(input)];
+            ++labelsCollected[prop.classify__(in)];
 
             if (success) {
                 ++numSuccess;
             } else {
-                if (prop.expect()) {
+                if (prop.expect__()) {
                     out << "*** Failed! ";
                 } else {
                     out << "+++ OK, failed as expected. ";
@@ -122,21 +145,21 @@ Result quickCheckOutput(const Property &prop = Property(),
 
                 std::size_t numShrinks = 0;
                 try {
-                    std::pair<std::size_t, typename Property::Input> shrinkRes =
-                        prop.shrinkInput(input);
+                    std::pair<std::size_t, typename Prop::Input> shrinkRes =
+                        detail::doShrink(prop, in);
                     numShrinks = shrinkRes.first;
                     if (numShrinks > 0) {
                         out << " and " << numShrinks
                             << (numShrinks == 1 ? " shrink" : " shrinks");
                     }
-                    out << " for input:" << std::endl;
-                    prop.printInput(out, shrinkRes.second);
+                    out << " for input:\n";
+                    //out << shrinkRes.second;
                 } catch (...) {
-                    out << " for input:" << std::endl;
-                    prop.printInput(out, input);
+                    out << " for input:\n";
+                    out << in;
                 }
 
-                if (prop.expect()) {
+                if (prop.expect__()) {
                     Result ret;
                     ret.result = QC_FAILURE;
                     ret.numTests = numSuccess + 1;
@@ -169,7 +192,7 @@ Result quickCheckOutput(const Property &prop = Property(),
     std::multimap<std::size_t, std::string> labels =
         detail::convertLabels(labelsCollected);
 
-    if (prop.expect()) {
+    if (prop.expect__()) {
         out << "+++ OK, passed " << numSuccess << " tests";
         if (numTrivial != 0)
             out << " (" << (100 * numTrivial / numSuccess) << "% trivial)";
