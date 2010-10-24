@@ -12,6 +12,8 @@ namespace cppqc {
 
 typedef boost::mt19937 RngEngine;
 
+template<class T> class Arbitrary;
+
 /*
  * When creating user defined generators, they must model a
  * "GeneratorConcept<T>", that is, they must be copy-constructable and have
@@ -62,6 +64,9 @@ namespace detail {
         virtual StatelessGenConcept *clone() const = 0;
     };
 }
+
+template<class T>
+class Generator;
 
 template<class T>
 class StatelessGenerator
@@ -147,6 +152,7 @@ class StatelessGenerator
                 const StatelessGeneratorModel m_obj;
         };
 
+        friend class Generator<T>;
         detail::StatelessGenConcept<T> *m_gen;
 };
 
@@ -894,7 +900,8 @@ namespace detail {
 /// Generates an std::vector of random length. The maximum length depends on the
 /// generation size parameter. Shrinks by removing elements from the vector.
 template<class T>
-StatelessGenerator<std::vector<T> > listOf(const StatelessGenerator<T> &g)
+StatelessGenerator<std::vector<T> > listOf(
+        const StatelessGenerator<T> &g = Arbitrary<T>())
 {
     return detail::ListOfStatelessGenerator<T>(g);
 }
@@ -948,7 +955,7 @@ namespace detail {
 /// the vector.
 template<class T>
 StatelessGenerator<std::vector<T> > listOfNonEmpty(
-        const StatelessGenerator<T> &g)
+        const StatelessGenerator<T> &g = Arbitrary<T>())
 {
     return detail::ListOfNonEmptyStatelessGenerator<T>(g);
 }
@@ -989,9 +996,10 @@ namespace detail {
 /// Generates an std::vector of the given length. Does not shrink. Prefer using
 /// listOf or listOfNonEmpty to vectorOf because those can shrink.
 template<class T>
-StatelessGenerator<std::vector<T> > vectorOf(const StatelessGenerator<T> &g)
+StatelessGenerator<std::vector<T> > vectorOf(std::size_t size,
+        const StatelessGenerator<T> &g = Arbitrary<T>())
 {
-    return detail::VectorOfStatelessGenerator<T>(g);
+    return detail::VectorOfStatelessGenerator<T>(size, g);
 }
 
 
