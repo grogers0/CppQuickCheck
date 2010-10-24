@@ -596,15 +596,17 @@ class Property
         template<class PropertyModel>
         Property &operator=(const PropertyModel &pm)
         {
+            detail::PropConcept<T1> *tmp = new PropModel<PropertyModel>(pm);
             delete m_prop;
-            m_prop = new PropModel<PropertyModel>(pm);
+            m_prop = tmp;
             return *this;
         }
 
         Property &operator=(const Property &p)
         {
+            detail::PropConcept<T1> *tmp = p.m_prop->clone();
             delete m_prop;
-            m_prop = p.m_prop->clone();
+            m_prop = tmp;
             return *this;
         }
 

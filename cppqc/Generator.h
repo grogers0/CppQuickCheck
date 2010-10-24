@@ -112,15 +112,18 @@ class StatelessGenerator
         template<class StatelessGeneratorModel>
         StatelessGenerator &operator=(const StatelessGeneratorModel &gm)
         {
+            detail::StatelessGenConcept<T> *tmp =
+                new StatelessGenModel<StatelessGeneratorModel>(gm);
             delete m_gen;
-            m_gen = new StatelessGenModel<StatelessGeneratorModel>(gm);
+            m_gen = tmp;
             return *this;
         }
 
         StatelessGenerator &operator=(const StatelessGenerator &g)
         {
+            detail::StatelessGenConcept<T> *tmp = g.m_gen.clone();
             delete m_gen;
-            m_gen = g.m_gen->clone();
+            m_gen = tmp;
             return *this;
         }
 
@@ -205,22 +208,25 @@ class Generator
         template<class GeneratorModel>
         Generator &operator=(const GeneratorModel &gm)
         {
+            detail::GenConcept<T> *tmp = new GenModel<GeneratorModel>(gm);
             delete m_gen;
-            m_gen = new GenModel<GeneratorModel>(gm);
+            m_gen = tmp;
             return *this;
         }
 
         Generator &operator=(const Generator &g)
         {
+            detail::GenConcept<T> *tmp = g.m_gen->clone();
             delete m_gen;
-            m_gen = g.m_gen->clone();
+            m_gen = tmp;
             return *this;
         }
 
         Generator &operator=(const StatelessGenerator<T> &g)
         {
+            detail::GenConcept<T> *tmp = g.m_gen->clone();
             delete m_gen;
-            m_gen = g.m_gen->clone();
+            m_gen = tmp;
             return *this;
         }
 
