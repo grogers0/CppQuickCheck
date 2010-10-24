@@ -1,0 +1,11 @@
+CppQuickCheck is built using the CMake tool: http://www.cmake.org so you must have that installed on your system. In addition, the library uses significant functionality from the popular BOOST library: http://www.boost.org so you must have that installed to be able to use CppQuickCheck.
+
+To build and install the library, invoke the following commands:
+
+    cmake .
+    make
+    sudo make install
+
+This will install CppQuickCheck into the default install location (usually /usr/local/include). See the cmake homepage for more details on different options.
+
+CppQuickCheck is a header only library. You do not need to link any libraries to use it. When building, it will build the examples but these will not be installed.
