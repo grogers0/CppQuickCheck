@@ -1,6 +1,6 @@
 ***CppQuickCheck***
 
-# ABOUT
+## ABOUT
 
 CppQuickCheck is a library for automated testing of C++ code. You provide a
 specification how your code is supposed to behave through *properties* and
@@ -8,11 +8,11 @@ CppQuickCheck will generate a large number of random test cases that attempt to
 prove or disprove the properties. The specifications are written in pure C++
 using the functionality of the CppQuickCheck library.
 
-# DOCUMENTATION
+## DOCUMENTATION
 
 todo
 
-# BACKGROUND
+## BACKGROUND
 
 CppQuickCheck is inspired and based on the
 [QuickCheck](http://code.haskell.org/QuickCheck/) library for
@@ -44,7 +44,7 @@ For these reasons, CppQuickCheck tries to maintain all the functionality of the
 Haskell QuickCheck, and so taking a different implementation approach than
 QuickCheck++.
 
-# LICENSE
+## LICENSE
 
 CppQuickCheck is distributed under a BSD license:
 
