@@ -28,18 +28,19 @@
 #include <boost/static_assert.hpp>
 #include <sstream>
 
-namespace std{
-std::ostream &operator<<(std::ostream &out, const std::vector<int> &v)
-{
-    out << "[";
-    for (std::vector<int>::const_iterator it = v.begin(); it != v.end(); ++it) {
-        if (it != v.begin())
-            out << ", ";
-        out << *it;
+namespace std {
+    std::ostream &operator<<(std::ostream &out, const std::vector<int> &v)
+    {
+        out << "[";
+        for (std::vector<int>::const_iterator it = v.begin(); it != v.end();
+                ++it) {
+            if (it != v.begin())
+                out << ", ";
+            out << *it;
+        }
+        out << "]";
+        return out;
     }
-    out << "]";
-    return out;
-}
 }
 
 struct PropTestReverse
@@ -51,7 +52,10 @@ struct PropTestReverse
         std::reverse(vrev.begin(), vrev.end());
         return std::equal(v.begin(), v.end(), vrev.begin());
     }
-    static const std::string name;
+    static std::string name()
+    {
+        return "Reversing Twice is Identity";
+    }
     static std::string classify(const std::vector<int> &v)
     {
         std::ostringstream sstr;
@@ -65,14 +69,6 @@ struct PropTestReverse
     static const cppqc::Generator<std::vector<int> > gen1;
 };
 const cppqc::Generator<std::vector<int> > PropTestReverse::gen1 = cppqc::listOf<int>();
-const std::string PropTestReverse::name = "Reversing Twice is Identity";
-
-/*
-std::string PropTestReverse::name() const
-{
-    return "PropTestReverse";
-}
-*/
 
 int main()
 {

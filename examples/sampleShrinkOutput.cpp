@@ -32,10 +32,12 @@
 
 using namespace cppqc;
 
-template<class T1, class T2>
-std::ostream &operator<<(std::ostream &out, const std::pair<T1, T2> &x)
-{
-	return out << '(' << x.first << ',' << x.second << ')';
+namespace std {
+    template<class T1, class T2>
+    std::ostream &operator<<(std::ostream &out, const std::pair<T1, T2> &x)
+    {
+        return out << '(' << x.first << ',' << x.second << ')';
+    }
 }
 
 const std::map<std::string, boost::function<void ()> >
