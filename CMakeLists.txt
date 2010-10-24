@@ -3,6 +3,7 @@ project(CppQuickCheck)
 
 add_executable(sampleOutput examples/sampleOutput.cpp)
 add_executable(sampleShrinkOutput examples/sampleShrinkOutput.cpp)
+add_executable(testReverse examples/TestReverse.cpp)
 
 include_directories("${PROJECT_BINARY_DIR}")
 
