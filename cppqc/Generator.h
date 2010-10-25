@@ -600,7 +600,10 @@ namespace detail {
 
             std::vector<T> shrink(const T &x)
             {
-                return m_gen.shrink(x);
+                std::vector<T> ret = m_gen.shrink(x);
+                ret.erase(std::remove_if(ret.begin(), ret.end(),
+                            std::not1(m_pred)), ret.end());
+                return ret;
             }
 
         private:
@@ -628,7 +631,10 @@ namespace detail {
 
             std::vector<T> shrink(const T &x) const
             {
-                return m_gen.shrink(x);
+                std::vector<T> ret = m_gen.shrink(x);
+                ret.erase(std::remove_if(ret.begin(), ret.end(),
+                            std::not1(m_pred)), ret.end());
+                return ret;
             }
 
         private:
