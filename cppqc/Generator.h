@@ -680,7 +680,7 @@ namespace detail {
             }
 
         private:
-            std::vector<const Generator<T> > m_gens;
+            std::vector<Generator<T> > m_gens;
             std::size_t m_last_index;
     };
 }
@@ -740,7 +740,7 @@ namespace detail {
             }
 
         private:
-            typedef std::vector<std::pair<std::size_t, const Generator<T> > >
+            typedef std::vector<std::pair<std::size_t, Generator<T> > >
                 GenContainer;
             GenContainer m_gens;
             std::size_t m_tot;
@@ -786,7 +786,7 @@ namespace detail {
             }
 
         private:
-            std::vector<const T> m_elems;
+            std::vector<T> m_elems;
             std::size_t m_last_index;
     };
 }
@@ -832,7 +832,7 @@ namespace detail {
 
         private:
             std::size_t m_last_index_plus_one;
-            std::vector<const T> m_fixed;
+            std::vector<T> m_fixed;
     };
 }
 
@@ -881,7 +881,7 @@ namespace detail {
 
         private:
             std::size_t m_last_index;
-            std::vector<const Generator<T> > m_gens;
+            std::vector<Generator<T> > m_gens;
     };
 }
 
