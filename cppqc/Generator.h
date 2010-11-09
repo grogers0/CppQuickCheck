@@ -440,7 +440,7 @@ namespace detail {
     {
         public:
             SizedGenerator(boost::function<Generator<T> (std::size_t)> f) :
-                m_genfun(f)
+                m_genfun(f), m_lastgen(f(0))
             {
             }
 
