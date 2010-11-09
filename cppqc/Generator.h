@@ -897,6 +897,136 @@ detail::ChainGenerator<T> chain(const Generator<T> &g)
 
 
 namespace detail {
+    template<class T, class U>
+    class ConvertGenerator
+    {
+        public:
+            ConvertGenerator(boost::function<T (U)> f, const Generator<U> &g) :
+                m_convert(f), m_gen(g)
+            {
+            }
+
+            T unGen(RngEngine &rng, std::size_t size)
+            {
+                m_lastgen_u.clear();
+                m_lastgen_t.clear();
+                m_lastgen_u.push_back(m_gen.unGen(rng, size));
+                m_lastgen_t.push_back(m_convert(m_lastgen_u.back()));
+                return m_lastgen_t.back();
+            }
+
+            std::vector<T> shrink(const T &x)
+            {
+                typename std::vector<T>::const_iterator it =
+                    std::find(m_lastgen_t.begin(), m_lastgen_t.end(), x);
+                assert(it != m_lastgen_t.end());
+                U last_u = m_lastgen_u[it - m_lastgen_t.begin()];
+                m_lastgen_t.clear();
+                m_lastgen_u = m_gen.shrink(last_u);
+                m_lastgen_t.reserve(m_lastgen_u.size());
+                std::transform(m_lastgen_u.begin(), m_lastgen_u.end(),
+                        std::back_inserter(m_lastgen_t), m_convert);
+                return m_lastgen_t;
+            }
+
+        private:
+            boost::function<T (U)> m_convert;
+            const Generator<U> m_gen;
+            std::vector<T> m_lastgen_t;
+            std::vector<U> m_lastgen_u;
+    };
+}
+
+/// Converts a generator of U's into a generator of T's by passing the results
+/// through a function which converts U's into T's.
+template<class T, class U>
+Generator<T> convert(boost::function<T (U)> f,
+        const Generator<U> &g = Arbitrary<U>())
+{
+    return detail::ConvertGenerator<T, U>(f, g);
+}
+
+/// Convenience function to aid generic programming, equivalent to convert.
+template<class T, class U1>
+Generator<T> combine(boost::function<T (U1)> f,
+        const Generator<U1> &g1 = Arbitrary<U1>())
+{
+    return detail::ConvertGenerator<T, U1>(f, g1);
+}
+
+
+namespace detail {
+    template<class T, class U1, class U2>
+    class CombineGenerator
+    {
+        public:
+            CombineGenerator(boost::function<T (U1, U2)> f,
+                    const Generator<U1> &g1,
+                    const Generator<U2> &g2) :
+                m_combine(f), m_gen1(g1), m_gen2(g2)
+            {
+            }
+
+            T unGen(RngEngine &rng, std::size_t size)
+            {
+                m_lastgen_u1.clear();
+                m_lastgen_u2.clear();
+                m_lastgen_t.clear();
+                m_lastgen_u1.push_back(m_gen1.unGen(rng, size));
+                m_lastgen_u2.push_back(m_gen2.unGen(rng, size));
+                m_lastgen_t.push_back(m_combine(m_lastgen_u1.back(),
+                            m_lastgen_u2.back()));
+                return m_lastgen_t.back();
+            }
+
+            std::vector<T> shrink(const T &x)
+            {
+                typename std::vector<T>::const_iterator it =
+                    std::find(m_lastgen_t.begin(), m_lastgen_t.end(), x);
+                assert(it != m_lastgen_t.end());
+                std::size_t dist = it - m_lastgen_t.begin();
+                U1 last_u1 = m_lastgen_u1[dist];
+                U2 last_u2 = m_lastgen_u2[dist];
+                m_lastgen_t.clear();
+                std::vector<U1> shrink1 = m_gen1.shrink(last_u1);
+                std::vector<U2> shrink2 = m_gen2.shrink(last_u2);
+                m_lastgen_u1.assign(shrink1.begin(), shrink1.end());
+                m_lastgen_u1.insert(m_lastgen_u1.end(),
+                        shrink2.size(), last_u1);
+                m_lastgen_u2.assign(shrink1.size(), last_u2);
+                m_lastgen_u2.insert(m_lastgen_u2.end(),
+                        shrink2.begin(), shrink2.end());
+
+                m_lastgen_t.reserve(m_lastgen_u1.size());
+                std::transform(m_lastgen_u1.begin(), m_lastgen_u1.end(),
+                        m_lastgen_u2.begin(), std::back_inserter(m_lastgen_t),
+                        m_combine);
+                return m_lastgen_t;
+            }
+
+        private:
+            boost::function<T (U1, U2)> m_combine;
+            const Generator<U1> m_gen1;
+            const Generator<U2> m_gen2;
+            std::vector<T> m_lastgen_t;
+            std::vector<U1> m_lastgen_u1;
+            std::vector<U2> m_lastgen_u2;
+    };
+}
+
+/// Combines generators of U1's and U2's into a generator of T's by passing the
+/// results through a function which converts U1's and U2's into T's. Ie. the
+/// same as convert for functions taking more than one argument.
+template<class T, class U1, class U2>
+Generator<T> combine(boost::function<T (U1, U2)> f,
+        const Generator<U1> &g1 = Arbitrary<U1>(),
+        const Generator<U2> &g2 = Arbitrary<U2>())
+{
+    return detail::CombineGenerator<T, U1, U2>(f, g1, g2);
+}
+
+
+namespace detail {
     template<class T>
     class ListOfStatelessGenerator
     {
