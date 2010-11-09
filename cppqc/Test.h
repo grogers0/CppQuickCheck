@@ -125,8 +125,8 @@ continueShrinking:
     }
 }
 
-template<class T1>
-Result quickCheckOutput(const Property<T1> &prop,
+template<class Prop>
+Result quickCheckOutput(const Prop &prop,
         std::ostream &out = std::cout,
         std::size_t maxSuccess = 100,
         std::size_t maxDiscarded = 0, std::size_t maxSize = 0)
@@ -144,7 +144,7 @@ Result quickCheckOutput(const Property<T1> &prop,
     while (numSuccess < maxSuccess) {
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;
-            typename Property<T1>::Input in = prop.generate(rng, size);
+            typename Prop::Input in = prop.generate(rng, size);
             bool success = false;
             try {
                 success = prop.check(in);
@@ -170,7 +170,7 @@ Result quickCheckOutput(const Property<T1> &prop,
 
                 std::size_t numShrinks = 0;
                 try {
-                    std::pair<std::size_t, typename Property<T1>::Input>
+                    std::pair<std::size_t, typename Prop::Input>
                         shrinkRes = detail::doShrink(prop, in);
                     numShrinks = shrinkRes.first;
                     if (numShrinks > 0) {
@@ -178,10 +178,10 @@ Result quickCheckOutput(const Property<T1> &prop,
                             << (numShrinks == 1 ? " shrink" : " shrinks");
                     }
                     out << " for input:\n";
-                    out << shrinkRes.second;
+                    printInput(out, shrinkRes.second);
                 } catch (...) {
                     out << " for input:\n";
-                    out << in;
+                    printInput(out, in);
                 }
 
                 if (prop.expect()) {

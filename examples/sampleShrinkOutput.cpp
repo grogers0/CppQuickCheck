@@ -29,6 +29,7 @@
 #include <map>
 #include <boost/bind.hpp>
 #include <boost/assign/list_of.hpp>
+#include <boost/tuple/tuple_io.hpp>
 
 using namespace cppqc;
 
@@ -62,6 +63,7 @@ sampleShrinkOutputCommand = boost::assign::map_list_of<std::string, boost::funct
 ("double",         boost::bind(sampleShrinkOutput<double>,              Arbitrary<double>(),              boost::ref(std::cout), 0, true, 0))
 ("long double",    boost::bind(sampleShrinkOutput<long double>,         Arbitrary<long double>(),         boost::ref(std::cout), 0, true, 0))
 ("pair",           boost::bind(sampleShrinkOutput<std::pair<int,int> >, Arbitrary<std::pair<int,int> >(), boost::ref(std::cout), 0, true, 0))
+("tuple",          boost::bind(sampleShrinkOutput<boost::tuple<int,int,int> >, tupleOf<int,int,int>(),    boost::ref(std::cout), 0, true, 0))
 ("string",         boost::bind(sampleShrinkOutput<std::string>,         Arbitrary<std::string>(),         boost::ref(std::cout), 0, true, 0));
 
 int main(int argc, char **argv)

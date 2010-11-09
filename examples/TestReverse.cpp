@@ -45,6 +45,7 @@ namespace std {
 
 struct PropTestReverse
 {
+    PropTestReverse() : gen0(cppqc::listOf<int>()) {}
     static bool check(const std::vector<int> &v)
     {
         std::vector<int> vrev(v);
@@ -52,23 +53,22 @@ struct PropTestReverse
         std::reverse(vrev.begin(), vrev.end());
         return std::equal(v.begin(), v.end(), vrev.begin());
     }
-    static std::string name()
+    std::string name() const
     {
         return "Reversing Twice is Identity";
     }
-    static std::string classify(const std::vector<int> &v)
+    std::string classify(const std::vector<int> &v) const
     {
         std::ostringstream sstr;
         sstr << "size " << v.size();
         return sstr.str();
     }
-    static bool trivial(const std::vector<int> &v)
+    bool trivial(const std::vector<int> &v) const
     {
         return v.empty() || v.size() == 1;
     }
-    static const cppqc::Generator<std::vector<int> > gen1;
+    const cppqc::Generator<std::vector<int> > gen0;
 };
-const cppqc::Generator<std::vector<int> > PropTestReverse::gen1 = cppqc::listOf<int>();
 
 int main()
 {
