@@ -32,6 +32,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <iostream>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 namespace cppqc {
@@ -696,14 +697,6 @@ detail::OneOfGenerator<T> oneof(const Generator<T> &g)
 
 
 namespace detail {
-    template<class PairType>
-    struct ComparePair1st
-    {
-        bool operator()(const PairType &a, const PairType &b)
-        {
-            return a.first < b.second;
-        }
-    };
     template<class T>
     class FrequencyGenerator
     {
@@ -715,8 +708,10 @@ namespace detail {
             FrequencyGenerator &operator()(std::size_t weight,
                     const Generator<T> &g)
             {
-                m_tot += weight;
-                m_gens.push_back(std::make_pair(m_tot, g));
+                if (weight != 0) {
+                    m_tot += weight;
+                    m_gens.insert(std::make_pair(m_tot, g));
+                }
                 return *this;
             }
 
@@ -724,26 +719,26 @@ namespace detail {
             {
                 boost::uniform_int<std::size_t> dist(1, m_tot);
                 std::size_t weight = dist(rng);
-                typename GenContainer::const_iterator it =
-                    std::lower_bound(m_gens.begin(), m_gens.end(), weight,
-                        ComparePair1st<typename GenContainer::value_type>());
+                typename std::map<std::size_t, Generator<T> >::iterator it =
+                    m_gens.lower_bound(weight);
                 if (it == m_gens.end()) {
                     throw std::logic_error("frequency: all generators have weight 0");
                 } else {
-                    m_last_index = std::distance(m_gens.begin(), it);
-                    return it->unGen(rng, size);
+                    m_last_index = it->first;
+                    return it->second.unGen(rng, size);
                 }
             }
 
             std::vector<T> shrink(const T &x)
             {
-                return m_gens[m_last_index].shrink(x);
+                typename std::map<std::size_t, Generator<T> >::iterator it =
+                    m_gens.find(m_last_index);
+                assert(it != m_gens.end());
+                return it->second.shrink(x);
             }
 
         private:
-            typedef std::vector<std::pair<std::size_t, Generator<T> > >
-                GenContainer;
-            GenContainer m_gens;
+            std::map<std::size_t, Generator<T> > m_gens;
             std::size_t m_tot;
             std::size_t m_last_index;
     };
@@ -917,7 +912,7 @@ namespace detail {
 
             std::vector<T> shrink(const T &x)
             {
-                typename std::vector<T>::const_iterator it =
+                typename std::vector<T>::iterator it =
                     std::find(m_lastgen_t.begin(), m_lastgen_t.end(), x);
                 assert(it != m_lastgen_t.end());
                 U last_u = m_lastgen_u[it - m_lastgen_t.begin()];
