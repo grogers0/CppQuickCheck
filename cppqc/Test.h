@@ -62,8 +62,8 @@ namespace detail {
     };
 }
 
-template<class T1>
-Result quickCheck(const Property<T1> &prop,
+template<class T0, class T1, class T2, class T3, class T4>
+Result quickCheck(const Property<T0, T1, T2, T3, T4> &prop,
         std::size_t maxSuccess = 100, std::size_t maxDiscarded = 0,
         std::size_t maxSize = 0)
 {
@@ -101,19 +101,23 @@ namespace detail {
         }
     }
 
-    template<class Prop>
-    std::pair<std::size_t, typename Prop::Input>
-    doShrink(const Prop &prop, const typename Prop::Input &in)
+    template<class T0, class T1, class T2, class T3, class T4>
+    std::pair<std::size_t, typename Property<T0, T1, T2, T3, T4>::Input>
+    doShrink(const Property<T0, T1, T2, T3, T4> &prop,
+            const typename Property<T0, T1, T2, T3, T4>::Input &in)
     {
+        typedef typename Property<T0, T1, T2, T3, T4>::Input Input;
+
         std::size_t numShrinks = 0;
-        typename Prop::Input shrunk = in;
+        Input shrunk = in;
 
         try {
 continueShrinking:
-            std::vector<typename Prop::Input> shrinks = prop.shrink(shrunk);
-            for (typename std::vector<typename Prop::Input>::const_iterator
-                    it = shrinks.begin(); it != shrinks.end(); ++it) {
-                if (!prop.check(*it)) {
+            std::vector<Input> shrinks =
+                prop.shrinkInput(shrunk);
+            for (typename std::vector<Input>::const_iterator it =
+                    shrinks.begin(); it != shrinks.end(); ++it) {
+                if (!prop.checkInput(*it)) {
                     shrunk = *it;
                     numShrinks++;
                     goto continueShrinking;
@@ -125,12 +129,14 @@ continueShrinking:
     }
 }
 
-template<class Prop>
-Result quickCheckOutput(const Prop &prop,
+template<class T0, class T1, class T2, class T3, class T4>
+Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
         std::ostream &out = std::cout,
         std::size_t maxSuccess = 100,
         std::size_t maxDiscarded = 0, std::size_t maxSize = 0)
 {
+    typedef typename Property<T0, T1, T2, T3, T4>::Input Input;
+
     out << "* Checking property \"" << prop.name() << "\" ..." << std::endl;
 
     if (maxDiscarded == 0)
@@ -144,17 +150,17 @@ Result quickCheckOutput(const Prop &prop,
     while (numSuccess < maxSuccess) {
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;
-            typename Prop::Input in = prop.generate(rng, size);
+            Input in = prop.generateInput(rng, size);
             bool success = false;
             try {
-                success = prop.check(in);
+                success = prop.checkInput(in);
             } catch (...) {
                 out << "Caught exception checking property...\n";
             }
 
-            if (prop.trivial(in))
+            if (prop.trivialInput(in))
                 ++numTrivial;
-            ++labelsCollected[prop.classify(in)];
+            ++labelsCollected[prop.classifyInput(in)];
 
             if (success) {
                 ++numSuccess;
@@ -170,8 +176,8 @@ Result quickCheckOutput(const Prop &prop,
 
                 std::size_t numShrinks = 0;
                 try {
-                    std::pair<std::size_t, typename Prop::Input>
-                        shrinkRes = detail::doShrink(prop, in);
+                    std::pair<std::size_t, Input> shrinkRes =
+                        detail::doShrink(prop, in);
                     numShrinks = shrinkRes.first;
                     if (numShrinks > 0) {
                         out << " and " << numShrinks

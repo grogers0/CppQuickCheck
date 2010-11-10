@@ -43,10 +43,10 @@ namespace std {
     }
 }
 
-struct PropTestReverse
+struct PropTestReverse : cppqc::Property<std::vector<int> >
 {
-    PropTestReverse() : gen0(cppqc::listOf<int>()) {}
-    static bool check(const std::vector<int> &v)
+    PropTestReverse() : Property(cppqc::listOf<int>()) {}
+    bool check(const std::vector<int> &v) const
     {
         std::vector<int> vrev(v);
         std::reverse(vrev.begin(), vrev.end());
@@ -67,10 +67,9 @@ struct PropTestReverse
     {
         return v.empty() || v.size() == 1;
     }
-    const cppqc::Generator<std::vector<int> > gen0;
 };
 
 int main()
 {
-    cppqc::quickCheckOutput(cppqc::Property<std::vector<int> >(PropTestReverse()));
+    cppqc::quickCheckOutput(PropTestReverse());
 }
