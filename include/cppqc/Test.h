@@ -141,7 +141,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
     if (maxDiscarded == 0)
         maxDiscarded = maxSuccess * 5;
     if (maxSize == 0)
-        maxSize = std::max<std::size_t>(100, maxSuccess/10);
+        maxSize = 100;
 
     std::map<std::string, std::size_t> labelsCollected;
     std::size_t numSuccess = 0, numDiscarded = 0, numTrivial = 0;
