@@ -30,10 +30,12 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <iostream>
+#include <cstddef>
+#include <iosfwd>
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <stdexcept>
 
 namespace cppqc {
 
@@ -302,7 +304,7 @@ std::vector<T> sample(const Generator<T> &g, std::size_t num = 0,
 /// Generates some example values and prints them.
 template<class T>
 void sampleOutput(const Generator<T> &g,
-        std::ostream &out = std::cout, std::size_t num = 0,
+        std::ostream &out, std::size_t num = 0,
         std::size_t seed = 0)
 {
     if (num == 0)

@@ -28,7 +28,6 @@
 
 #include "Property.h"
 
-#include <cstddef>
 #include <map>
 #include <string>
 #include <iostream>

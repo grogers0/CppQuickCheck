@@ -27,13 +27,6 @@
 #define CPPQC_PROPERTY_H
 
 #include "Generator.h"
-#include "Arbitrary.h"
-
-#include <stdexcept>
-
-#include <boost/type_traits/integral_constant.hpp>
-#include <boost/type_traits/is_class.hpp>
-#include <boost/utility/enable_if.hpp>
 
 namespace cppqc {
 

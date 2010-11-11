@@ -28,7 +28,6 @@
 
 #include "Generator.h"
 
-#include <vector>
 #include <limits>
 
 #include <boost/random/uniform_int.hpp>

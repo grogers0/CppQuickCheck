@@ -23,8 +23,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cppqc/Generator.h"
-#include "cppqc/Arbitrary.h"
+#include "cppqc.h"
 
 #include <map>
 #include <boost/bind.hpp>

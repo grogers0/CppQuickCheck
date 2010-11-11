@@ -23,7 +23,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cppqc/Test.h"
+#include "cppqc.h"
+
 #include <algorithm>
 #include <boost/static_assert.hpp>
 #include <sstream>
