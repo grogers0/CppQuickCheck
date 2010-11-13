@@ -31,6 +31,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <ostream>
 
 namespace cppqc {
@@ -94,7 +95,7 @@ namespace detail {
             }
 
             if (it->second != "") {
-                out << "  " << (100 * it->first / numSuccess) << "% "
+                out << std::setw(3) << (100 * it->first / numSuccess) << "% "
                     << it->second << std::endl;
             }
         }
