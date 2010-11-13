@@ -159,8 +159,6 @@ struct ArbitraryImpl<bool>
     static const Arbitrary<bool>::unGenType unGen;
     static const Arbitrary<bool>::shrinkType shrink;
 };
-const Arbitrary<bool>::unGenType ArbitraryImpl<bool>::unGen = arbitraryBool;
-const Arbitrary<bool>::shrinkType ArbitraryImpl<bool>::shrink = shrinkBool;
 
 template<>
 struct ArbitraryImpl<signed char>
@@ -168,10 +166,6 @@ struct ArbitraryImpl<signed char>
     static const Arbitrary<signed char>::unGenType unGen;
     static const Arbitrary<signed char>::shrinkType shrink;
 };
-const Arbitrary<signed char>::unGenType ArbitraryImpl<signed char>::unGen =
-arbitrarySizedBoundedIntegral<signed char>;
-const Arbitrary<signed char>::shrinkType ArbitraryImpl<signed char>::shrink =
-shrinkIntegral<signed char>;
 
 template<>
 struct ArbitraryImpl<unsigned char>
@@ -179,10 +173,6 @@ struct ArbitraryImpl<unsigned char>
     static const Arbitrary<unsigned char>::unGenType unGen;
     static const Arbitrary<unsigned char>::shrinkType shrink;
 };
-const Arbitrary<unsigned char>::unGenType ArbitraryImpl<unsigned char>::unGen =
-arbitrarySizedBoundedIntegral<unsigned char>;
-const Arbitrary<unsigned char>::shrinkType
-ArbitraryImpl<unsigned char>::shrink = shrinkIntegral<unsigned char>;
 
 template<>
 struct ArbitraryImpl<signed short>
@@ -190,10 +180,6 @@ struct ArbitraryImpl<signed short>
     static const Arbitrary<signed short>::unGenType unGen;
     static const Arbitrary<signed short>::shrinkType shrink;
 };
-const Arbitrary<signed short>::unGenType ArbitraryImpl<signed short>::unGen =
-arbitrarySizedBoundedIntegral<signed short>;
-const Arbitrary<signed short>::shrinkType ArbitraryImpl<signed short>::shrink =
-shrinkIntegral<signed short>;
 
 template<>
 struct ArbitraryImpl<unsigned short>
@@ -201,11 +187,6 @@ struct ArbitraryImpl<unsigned short>
     static const Arbitrary<unsigned short>::unGenType unGen;
     static const Arbitrary<unsigned short>::shrinkType shrink;
 };
-const Arbitrary<unsigned short>::unGenType
-ArbitraryImpl<unsigned short>::unGen =
-arbitrarySizedBoundedIntegral<unsigned short>;
-const Arbitrary<unsigned short>::shrinkType
-ArbitraryImpl<unsigned short>::shrink = shrinkIntegral<unsigned short>;
 
 template<>
 struct ArbitraryImpl<signed int>
@@ -213,10 +194,6 @@ struct ArbitraryImpl<signed int>
     static const Arbitrary<signed int>::unGenType unGen;
     static const Arbitrary<signed int>::shrinkType shrink;
 };
-const Arbitrary<signed int>::unGenType ArbitraryImpl<signed int>::unGen =
-arbitrarySizedBoundedIntegral<signed int>;
-const Arbitrary<signed int>::shrinkType ArbitraryImpl<signed int>::shrink =
-shrinkIntegral<signed int>;
 
 template<>
 struct ArbitraryImpl<unsigned int>
@@ -224,10 +201,6 @@ struct ArbitraryImpl<unsigned int>
     static const Arbitrary<unsigned int>::unGenType unGen;
     static const Arbitrary<unsigned int>::shrinkType shrink;
 };
-const Arbitrary<unsigned int>::unGenType ArbitraryImpl<unsigned int>::unGen =
-arbitrarySizedBoundedIntegral<unsigned int>;
-const Arbitrary<unsigned int>::shrinkType ArbitraryImpl<unsigned int>::shrink =
-shrinkIntegral<unsigned int>;
 
 template<>
 struct ArbitraryImpl<signed long>
@@ -235,10 +208,6 @@ struct ArbitraryImpl<signed long>
     static const Arbitrary<signed long>::unGenType unGen;
     static const Arbitrary<signed long>::shrinkType shrink;
 };
-const Arbitrary<signed long>::unGenType ArbitraryImpl<signed long>::unGen =
-arbitrarySizedBoundedIntegral<signed long>;
-const Arbitrary<signed long>::shrinkType ArbitraryImpl<signed long>::shrink =
-shrinkIntegral<signed long>;
 
 template<>
 struct ArbitraryImpl<unsigned long>
@@ -246,10 +215,6 @@ struct ArbitraryImpl<unsigned long>
     static const Arbitrary<unsigned long>::unGenType unGen;
     static const Arbitrary<unsigned long>::shrinkType shrink;
 };
-const Arbitrary<unsigned long>::unGenType ArbitraryImpl<unsigned long>::unGen =
-arbitrarySizedBoundedIntegral<unsigned long>;
-const Arbitrary<unsigned long>::shrinkType ArbitraryImpl<unsigned long>::shrink =
-shrinkIntegral<unsigned long>;
 
 template<>
 struct ArbitraryImpl<float>
@@ -257,9 +222,6 @@ struct ArbitraryImpl<float>
     static const Arbitrary<float>::unGenType unGen;
     static const Arbitrary<float>::shrinkType shrink;
 };
-const Arbitrary<float>::unGenType ArbitraryImpl<float>::unGen =
-arbitrarySizedReal<float>;
-const Arbitrary<float>::shrinkType ArbitraryImpl<float>::shrink = shrinkReal<float>;
 
 template<>
 struct ArbitraryImpl<double>
@@ -267,9 +229,6 @@ struct ArbitraryImpl<double>
     static const Arbitrary<double>::unGenType unGen;
     static const Arbitrary<double>::shrinkType shrink;
 };
-const Arbitrary<double>::unGenType ArbitraryImpl<double>::unGen =
-arbitrarySizedReal<double>;
-const Arbitrary<double>::shrinkType ArbitraryImpl<double>::shrink = shrinkReal<double>;
 
 template<>
 struct ArbitraryImpl<long double>
@@ -277,10 +236,6 @@ struct ArbitraryImpl<long double>
     static const Arbitrary<long double>::unGenType unGen;
     static const Arbitrary<long double>::shrinkType shrink;
 };
-const Arbitrary<long double>::unGenType ArbitraryImpl<long double>::unGen =
-arbitrarySizedReal<long double>;
-const Arbitrary<long double>::shrinkType ArbitraryImpl<long double>::shrink =
-shrinkReal<long double>;
 
 inline char arbitraryChar(RngEngine &rng, std::size_t)
 {
@@ -308,8 +263,6 @@ struct ArbitraryImpl<char>
     static const Arbitrary<char>::unGenType unGen;
     static const Arbitrary<char>::shrinkType shrink;
 };
-const Arbitrary<char>::unGenType ArbitraryImpl<char>::unGen = arbitraryChar;
-const Arbitrary<char>::shrinkType ArbitraryImpl<char>::shrink = shrinkChar;
 
 template<>
 struct ArbitraryImpl<wchar_t>
@@ -317,10 +270,6 @@ struct ArbitraryImpl<wchar_t>
     static const Arbitrary<wchar_t>::unGenType unGen;
     static const Arbitrary<wchar_t>::shrinkType shrink;
 };
-const Arbitrary<wchar_t>::unGenType ArbitraryImpl<wchar_t>::unGen =
-arbitraryBoundedIntegral<wchar_t>;
-const Arbitrary<wchar_t>::shrinkType ArbitraryImpl<wchar_t>::shrink =
-shrinkIntegral<wchar_t>;
 
 template<class String>
 String arbitraryString(RngEngine &rng, std::size_t size)
