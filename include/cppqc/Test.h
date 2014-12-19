@@ -87,8 +87,7 @@ namespace detail {
             const std::multimap<std::size_t, std::string> &labels)
     {
         std::size_t cnt = 20;
-        for (std::map<std::size_t, std::string>::const_reverse_iterator
-                it = labels.rbegin(); it != labels.rend(); --cnt, ++it) {
+        for (auto it = labels.rbegin(); it != labels.rend(); --cnt, ++it) {
             if (cnt == 0) {
                 out << "  ..." << std::endl;
                 break;

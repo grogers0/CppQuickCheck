@@ -41,7 +41,7 @@ namespace cppqc {
 
 typedef boost::mt19937 RngEngine;
 
-template<class T> class Arbitrary;
+template<class T> struct Arbitrary;
 
 /*
  * When creating user defined generators, they must model a
@@ -88,9 +88,9 @@ namespace detail {
         virtual ~StatelessGenConcept()
         {
         }
-        virtual T unGen(RngEngine &, std::size_t) const = 0;
-        virtual std::vector<T> shrink(const T &) const = 0;
-        virtual StatelessGenConcept *clone() const = 0;
+        virtual T unGen(RngEngine &, std::size_t) override = 0;
+        virtual std::vector<T> shrink(const T &) override = 0;
+        virtual StatelessGenConcept *clone() const override = 0;
     };
 }
 
@@ -258,17 +258,17 @@ class Generator
                 {
                 }
 
-                T unGen(RngEngine &rng, std::size_t size)
+                T unGen(RngEngine &rng, std::size_t size) override
                 {
                     return m_obj.unGen(rng, size);
                 }
 
-                std::vector<T> shrink(const T &x)
+                std::vector<T> shrink(const T &x) override
                 {
                     return m_obj.shrink(x);
                 }
 
-                detail::GenConcept<T> *clone() const
+                detail::GenConcept<T> *clone() const override
                 {
                     return new GenModel(m_obj);
                 }

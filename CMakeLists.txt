@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(CppQuickCheck)
-set(CMAKE_CXX_FLAGS "-O3 -std=gnu++11")
+set(CMAKE_CXX_FLAGS "-O3 -g -Wall -std=gnu++11")
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
