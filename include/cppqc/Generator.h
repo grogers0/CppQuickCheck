@@ -151,7 +151,7 @@ class StatelessGenerator
         class StatelessGenModel : public detail::StatelessGenConcept<T>
         {
             public:
-                StatelessGenModel(const StatelessGeneratorModel &gm) : m_obj(gm)
+                StatelessGenModel(StatelessGeneratorModel gm) : m_obj(std::move(gm))
                 {
                 }
 
@@ -254,7 +254,7 @@ class Generator
         class GenModel : public detail::GenConcept<T>
         {
             public:
-                GenModel(const GeneratorModel &gm) : m_obj(gm)
+                GenModel(GeneratorModel gm) : m_obj(std::move(gm))
                 {
                 }
 
@@ -289,7 +289,7 @@ std::vector<T> sample(const Generator<T> &g, std::size_t num = 0,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     std::vector<T> ret;
     ret.reserve(num);
@@ -310,7 +310,7 @@ void sampleOutput(const Generator<T> &g,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     try {
         for (std::size_t i = 0; i < num; ++i) {
@@ -332,7 +332,7 @@ std::vector<std::pair<T, std::vector<T> > > sampleShrink(const Generator<T> &g,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     std::vector<std::pair<T, std::vector<T> > > ret;
     ret.reserve(num);
@@ -355,7 +355,7 @@ void sampleShrinkOutput(const Generator<T> &g, std::ostream &out,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     try {
         for (std::size_t i = 0; i < num; ++i) {

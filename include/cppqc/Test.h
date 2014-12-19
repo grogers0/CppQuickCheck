@@ -58,7 +58,7 @@ struct Result
 namespace detail {
     struct NullOstream : std::ostream
     {
-        NullOstream() : std::ios(0), std::ostream(0) {}
+        NullOstream() : std::ios(nullptr), std::ostream(nullptr) {}
     };
 }
 
@@ -76,9 +76,8 @@ namespace detail {
             const std::map<std::string, std::size_t> &labelsCollected)
     {
         std::multimap<std::size_t, std::string> labels;
-        for (std::map<std::string, std::size_t>::const_iterator it =
-                labelsCollected.begin(); it != labelsCollected.end(); ++it) {
-            labels.insert(std::make_pair(it->second, it->first));
+        for (const auto & elem : labelsCollected) {
+            labels.insert(std::make_pair(elem.second, elem.first));
         }
         return labels;
     }
@@ -145,7 +144,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
 
     std::map<std::string, std::size_t> labelsCollected;
     std::size_t numSuccess = 0, numDiscarded = 0, numTrivial = 0;
-    RngEngine rng(time(0));
+    RngEngine rng(time(nullptr));
     while (numSuccess < maxSuccess) {
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;
