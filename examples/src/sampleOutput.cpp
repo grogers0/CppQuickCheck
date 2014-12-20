@@ -32,14 +32,6 @@
 
 using namespace cppqc;
 
-namespace std {
-    template<class T1, class T2>
-    std::ostream &operator<<(std::ostream &out, const std::pair<T1, T2> &x)
-    {
-        return out << '(' << x.first << ',' << x.second << ')';
-    }
-}
-
 const std::map<std::string, boost::function<void ()> >
 sampleOutputCommand = boost::assign::map_list_of<std::string, boost::function<void ()> >
 ("bool",           boost::bind(sampleOutput<bool>,                Arbitrary<bool>(),                boost::ref(std::cout), 0, 0))

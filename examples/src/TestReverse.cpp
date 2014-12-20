@@ -29,24 +29,8 @@
 #include <boost/static_assert.hpp>
 #include <sstream>
 
-namespace std {
-    std::ostream &operator<<(std::ostream &out, const std::vector<int> &v)
-    {
-        out << "[";
-        for (std::vector<int>::const_iterator it = v.begin(); it != v.end();
-                ++it) {
-            if (it != v.begin())
-                out << ", ";
-            out << *it;
-        }
-        out << "]";
-        return out;
-    }
-}
-
-struct PropTestReverse : cppqc::Property<std::vector<int> >
+struct PropTestReverse : cppqc::Property<std::vector<int>>
 {
-    PropTestReverse() : Property(cppqc::listOf<int>()) {}
     bool check(const std::vector<int> &v) const override
     {
         std::vector<int> vrev(v);

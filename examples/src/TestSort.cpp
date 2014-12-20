@@ -46,27 +46,11 @@ void selection_sort(InputIterator b, InputIterator e, bool make_mistakes = false
         std::swap(*(std::min_element(c, e)), *c);
     }
 }
-    
+
 }
 
-namespace std {
-    std::ostream &operator<<(std::ostream &out, const std::vector<int> &v)
-    {
-        out << "[";
-        for (std::vector<int>::const_iterator it = v.begin(); it != v.end();
-                ++it) {
-            if (it != v.begin())
-                out << ", ";
-            out << *it;
-        }
-        out << "]";
-        return out;
-    }
-}
-
-struct PropTestSort: cppqc::Property<std::vector<int> >
+struct PropTestSort: cppqc::Property<std::vector<int>>
 {
-    PropTestSort() : Property(cppqc::listOf<int>()) {}
     bool check(const std::vector<int> &v) const override
     {
         std::vector<int> v_copy(v);
