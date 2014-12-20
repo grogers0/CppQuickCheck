@@ -41,7 +41,7 @@ namespace cppqc {
 
 typedef boost::mt19937 RngEngine;
 
-template<class T> class Arbitrary;
+template<class T> struct Arbitrary;
 
 /*
  * When creating user defined generators, they must model a
@@ -88,9 +88,9 @@ namespace detail {
         virtual ~StatelessGenConcept()
         {
         }
-        virtual T unGen(RngEngine &, std::size_t) const = 0;
-        virtual std::vector<T> shrink(const T &) const = 0;
-        virtual StatelessGenConcept *clone() const = 0;
+        virtual T unGen(RngEngine &, std::size_t) override = 0;
+        virtual std::vector<T> shrink(const T &) override = 0;
+        virtual StatelessGenConcept *clone() const override = 0;
     };
 }
 
@@ -151,7 +151,7 @@ class StatelessGenerator
         class StatelessGenModel : public detail::StatelessGenConcept<T>
         {
             public:
-                StatelessGenModel(const StatelessGeneratorModel &gm) : m_obj(gm)
+                StatelessGenModel(StatelessGeneratorModel gm) : m_obj(std::move(gm))
                 {
                 }
 
@@ -254,21 +254,21 @@ class Generator
         class GenModel : public detail::GenConcept<T>
         {
             public:
-                GenModel(const GeneratorModel &gm) : m_obj(gm)
+                GenModel(GeneratorModel gm) : m_obj(std::move(gm))
                 {
                 }
 
-                T unGen(RngEngine &rng, std::size_t size)
+                T unGen(RngEngine &rng, std::size_t size) override
                 {
                     return m_obj.unGen(rng, size);
                 }
 
-                std::vector<T> shrink(const T &x)
+                std::vector<T> shrink(const T &x) override
                 {
                     return m_obj.shrink(x);
                 }
 
-                detail::GenConcept<T> *clone() const
+                detail::GenConcept<T> *clone() const override
                 {
                     return new GenModel(m_obj);
                 }
@@ -289,7 +289,7 @@ std::vector<T> sample(const Generator<T> &g, std::size_t num = 0,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     std::vector<T> ret;
     ret.reserve(num);
@@ -310,7 +310,7 @@ void sampleOutput(const Generator<T> &g,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     try {
         for (std::size_t i = 0; i < num; ++i) {
@@ -332,7 +332,7 @@ std::vector<std::pair<T, std::vector<T> > > sampleShrink(const Generator<T> &g,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     std::vector<std::pair<T, std::vector<T> > > ret;
     ret.reserve(num);
@@ -355,7 +355,7 @@ void sampleShrinkOutput(const Generator<T> &g, std::ostream &out,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     try {
         for (std::size_t i = 0; i < num; ++i) {

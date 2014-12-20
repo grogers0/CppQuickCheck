@@ -26,8 +26,28 @@
 #include "cppqc.h"
 
 #include <algorithm>
+#include <iterator>
 #include <boost/static_assert.hpp>
 #include <sstream>
+
+namespace uut {
+
+template <typename InputIterator>
+void selection_sort(InputIterator b, InputIterator e, bool make_mistakes = false)
+{
+    //Selection sort performs the following steps:
+    //1) From the current iterator, find the smallest value
+    //2) Swap the smallest value with the current iterator
+    //3) Continue until end of range
+
+    make_mistakes && b != e ? ++b : b;
+    for(InputIterator c = b; c != e ; ++c)
+    {
+        std::swap(*(std::min_element(c, e)), *c);
+    }
+}
+    
+}
 
 namespace std {
     std::ostream &operator<<(std::ostream &out, const std::vector<int> &v)
@@ -44,19 +64,18 @@ namespace std {
     }
 }
 
-struct PropTestReverse : cppqc::Property<std::vector<int> >
+struct PropTestSort: cppqc::Property<std::vector<int> >
 {
-    PropTestReverse() : Property(cppqc::listOf<int>()) {}
+    PropTestSort() : Property(cppqc::listOf<int>()) {}
     bool check(const std::vector<int> &v) const override
     {
-        std::vector<int> vrev(v);
-        std::reverse(vrev.begin(), vrev.end());
-        std::reverse(vrev.begin(), vrev.end());
-        return std::equal(v.begin(), v.end(), vrev.begin());
+        std::vector<int> v_copy(v);
+        uut::selection_sort(std::begin(v_copy), std::end(v_copy), true);
+        return std::is_sorted(std::begin(v_copy), std::end(v_copy));
     }
     std::string name() const override
     {
-        return "Reversing Twice is Identity";
+        return "Sorting should be sorted";
     }
     std::string classify(const std::vector<int> &v) const override
     {
@@ -72,5 +91,5 @@ struct PropTestReverse : cppqc::Property<std::vector<int> >
 
 int main()
 {
-    cppqc::quickCheckOutput(PropTestReverse());
+    cppqc::quickCheckOutput(PropTestSort());
 }
