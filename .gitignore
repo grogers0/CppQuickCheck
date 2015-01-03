@@ -7,4 +7,5 @@ install_manifest.txt
 sampleOutput
 sampleShrinkOutput
 testReverse
+testSort
 libcppqc.so
