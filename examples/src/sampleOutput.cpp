@@ -59,9 +59,13 @@ sampleOutputCommand = boost::assign::map_list_of<std::string, boost::function<vo
 
 int main(int argc, char **argv)
 {
+    if(argc == 1) {
+        std::cout << "Usage: TYPES... (e.g., int, double, string)\n";
+        return 0;
+    }
+
     for (int i = 1; i < argc; ++i) {
-        std::map<std::string, boost::function<void ()> >::const_iterator it =
-            sampleOutputCommand.find(argv[i]);
+        auto it = sampleOutputCommand.find(argv[i]);
         if (it != sampleOutputCommand.end())
             it->second();
         else

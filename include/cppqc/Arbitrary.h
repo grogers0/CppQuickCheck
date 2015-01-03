@@ -74,7 +74,7 @@ Integral arbitrarySizedBoundedIntegral(RngEngine &rng, std::size_t size)
 template<class Real>
 Real arbitrarySizedReal(RngEngine &rng, std::size_t size)
 {
-    boost::uniform_real<Real> dist(-Real(size), Real(size));
+    boost::uniform_real<Real> dist(-Real(size + 1.0), Real(size + 1.0));
     return dist(rng);
 }
 
