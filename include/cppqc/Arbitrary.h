@@ -141,7 +141,7 @@ ArbitraryImpl<T>::shrink;
 
 // included specializations
 
-inline bool arbitraryBool(RngEngine &rng, std::size_t size)
+inline bool arbitraryBool(RngEngine &rng, std::size_t /*size*/)
 {
     if (boost::uniform_smallint<int>(0, 1)(rng))
         return true;
