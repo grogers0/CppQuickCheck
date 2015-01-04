@@ -34,8 +34,14 @@ namespace cppqc {
 class PropertyBase
 {
     public:
+        // By default, it is expected that every check passes.
         virtual bool expect() const { return true; }
-        virtual std::string name() const { return ""; }
+
+        // Should be overwriten by subclasses, as the default
+        // implementation is compiler dependent.
+        // (However, in practice, gcc and clang produce useful defaults.)
+        virtual std::string name() const { return typeid(*this).name(); }
+
         virtual ~PropertyBase() {}
 };
 
