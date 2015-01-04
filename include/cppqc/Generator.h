@@ -1043,18 +1043,31 @@ namespace detail {
                 return ret;
             }
 
-            std::vector<std::vector<T> > shrink(const std::vector<T> &x) const
+            std::vector<std::vector<T>> shrink(const std::vector<T> &v) const
             {
-                std::vector<std::vector<T> > ret;
-                ret.reserve(x.size());
-                for (typename std::vector<T>::const_iterator it = x.begin();
-                        it != x.end(); ++it) {
-                    ret.push_back(std::vector<T>());
-                    ret.back().reserve(x.size() - 1);
-                    ret.back().insert(ret.back().end(), x.begin(), it);
-                    ret.back().insert(ret.back().end(), it + 1, x.end());
+                std::vector<std::vector<T>> result;
+
+                // 1) leave one element out (reduces size of new arrays by one)
+                for(auto it = v.begin(); it != v.end(); ++it) {
+                    typename std::vector<T> shortendV;
+                    shortendV.reserve(v.size() - 1);
+                    shortendV.insert(shortendV.end(), v.begin(), it);
+                    shortendV.insert(shortendV.end(), it + 1, v.end());
+                    assert(shortendV.size() == v.size() - 1);
+                    result.push_back(std::move(shortendV));
                 }
-                return ret;
+
+                // 2) shrink each element
+                //    (array size stays the same but inner elements shrink)
+                for(int i = 0; i < static_cast<int>(v.size()); ++i) {
+                    typename std::vector<T> shrinkedTypes = Arbitrary<T>::shrink(v[i]);
+                    for(T &shrinked : Arbitrary<T>::shrink(v[i])) {
+                        auto copy = v;
+                        copy[i] = std::move(shrinked);
+                        result.push_back(std::move(copy));
+                    }
+                }
+                return result;
             }
 
         private:

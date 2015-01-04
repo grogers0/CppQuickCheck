@@ -361,44 +361,16 @@ template <typename T>
 const typename Arbitrary<std::vector<T>>::unGenType
     ArbitraryImpl<std::vector<T>>::unGen = [](RngEngine &rng,
                                               std::size_t size) {
-    typename std::vector<T> result;
-
-    boost::uniform_int<std::size_t> dist{0, size};
-    std::size_t n = dist(rng);
-    result.reserve(n);
-    for(std::size_t i = 0; i < n; ++i) {
-        result.push_back(Arbitrary<T>::unGen(rng, size));
-    }
-    return result;
+    const auto& vectorGenerator = listOf<T>();
+    return vectorGenerator.unGen(rng, size);
 };
 
 template <typename T>
 const typename Arbitrary<std::vector<T>>::shrinkType
     ArbitraryImpl<std::vector<T>>::shrink = [](const std::vector<T> &v) {
 
-    typename std::vector<typename std::vector<T>> result;
-
-    // 1) leave one element out (reduces size of new arrays by one)
-    for(auto it = v.begin(); it != v.end(); ++it) {
-        typename std::vector<T> short_v;
-        short_v.reserve(v.size() - 1);
-        short_v.insert(short_v.end(), v.begin(), it);
-        short_v.insert(short_v.end(), it + 1, v.end());
-        assert(short_v.size() == v.size() - 1);
-        result.push_back(std::move(short_v));
-    }
-
-    // 2) shrink each element
-    //    (array size stays the same but inner elements shrink)
-    for(int i = 0; i < static_cast<int>(v.size()); ++i) {
-        typename std::vector<T> shrinkedTypes = Arbitrary<T>::shrink(v[i]);
-        for(T &shrinked : Arbitrary<T>::shrink(v[i])) {
-            auto copy = v;
-            copy[i] = std::move(shrinked);
-            result.push_back(std::move(copy));
-        }
-    }
-    return result;
+    const auto& vectorGenerator = listOf<T>();
+    return vectorGenerator.shrink(v);
 };
 }
 
