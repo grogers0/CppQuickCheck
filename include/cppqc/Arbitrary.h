@@ -115,8 +115,8 @@ struct Arbitrary
     typedef boost::function<T (RngEngine &, std::size_t)> unGenType;
     typedef boost::function<std::vector<T> (T)> shrinkType;
 
-    static const unGenType unGen;
-    static const shrinkType shrink;
+    static const unGenType &unGen;
+    static const shrinkType &shrink;
 };
 
 /*
@@ -133,10 +133,10 @@ struct ArbitraryImpl
 };
 
 template<class T>
-const typename Arbitrary<T>::unGenType Arbitrary<T>::unGen =
+const typename Arbitrary<T>::unGenType &Arbitrary<T>::unGen =
 ArbitraryImpl<T>::unGen;
 template<class T>
-const typename Arbitrary<T>::shrinkType Arbitrary<T>::shrink =
+const typename Arbitrary<T>::shrinkType &Arbitrary<T>::shrink =
 ArbitraryImpl<T>::shrink;
 
 // included specializations
