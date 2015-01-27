@@ -132,12 +132,17 @@ struct ArbitraryImpl
     // and they try to use Arbitrary<TheirClass>, a compile error will result.
 };
 
+// Note: The call is wrapped in a function to avoid issues
+//       with static ordering when ArbitraryImpl is defined
+//       in another compilation unit. Do not simplify it
+//       by a replacing it with an assignment.
 template<class T>
 const typename Arbitrary<T>::unGenType Arbitrary<T>::unGen = [](RngEngine &rng,
                                                                 std::size_t size) {
     return ArbitraryImpl<T>::unGen(rng, size);
 };
 
+// (function call is needed: see above)
 template<class T>
 const typename Arbitrary<T>::shrinkType Arbitrary<T>::shrink = [](const T &v) {
     return ArbitraryImpl<T>::shrink(v);
