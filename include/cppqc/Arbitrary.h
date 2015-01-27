@@ -133,11 +133,15 @@ struct ArbitraryImpl
 };
 
 template<class T>
-const typename Arbitrary<T>::unGenType Arbitrary<T>::unGen =
-ArbitraryImpl<T>::unGen;
+const typename Arbitrary<T>::unGenType Arbitrary<T>::unGen = [](RngEngine &rng,
+                                                                std::size_t size) {
+    return ArbitraryImpl<T>::unGen(rng, size);
+};
+
 template<class T>
-const typename Arbitrary<T>::shrinkType Arbitrary<T>::shrink =
-ArbitraryImpl<T>::shrink;
+const typename Arbitrary<T>::shrinkType Arbitrary<T>::shrink = [](const T &v) {
+    return ArbitraryImpl<T>::shrink(v);
+};
 
 // included specializations
 
