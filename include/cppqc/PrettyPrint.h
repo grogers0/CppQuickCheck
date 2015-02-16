@@ -23,38 +23,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cppqc.h"
+#ifndef CPPQC_PRETTY_PRINT_H
+#define CPPQC_PRETTY_PRINT_H
 
-#include <algorithm>
-#include <boost/static_assert.hpp>
+#include "cxx-prettyprint.h"
+#include <string>
 #include <sstream>
 
-struct PropTestReverse : cppqc::Property<std::vector<int>>
-{
-    bool check(const std::vector<int> &v) const override
-    {
-        std::vector<int> vrev(v);
-        std::reverse(vrev.begin(), vrev.end());
-        std::reverse(vrev.begin(), vrev.end());
-        return std::equal(v.begin(), v.end(), vrev.begin());
-    }
-    std::string name() const override
-    {
-        return "Reversing Twice is Identity";
-    }
-    std::string classify(const std::vector<int> &v) const override
-    {
-        std::ostringstream sstr;
-        sstr << "size " << v.size();
-        return sstr.str();
-    }
-    bool trivial(const std::vector<int> &v) const override
-    {
-        return v.empty() || v.size() == 1;
-    }
-};
+namespace cppqc {
 
-int main()
-{
-    cppqc::quickCheckOutput(PropTestReverse());
+    // The default implementation falls back to the std::ofstream
+    // implementation. Note that because of the usage of "cxx-prettyprint",
+    // it can handle understands C++ containers, pairs and tuples.
+    //
+    // Strings are quoted to improve readability.
+    //
+    template <class T>
+    struct PrettyPrint
+    {
+        static std::string toString(const T& x)
+        {
+            std::ostringstream out;
+            out << x;
+            return out.str();
+        }
+    };
+
+    template <>
+    struct PrettyPrint<std::string>
+    {
+        static std::string toString(const std::string& x)
+        {
+            return '\"' + x + '\"';
+        }
+    };
+
+    template <class T>
+    std::string prettyPrint(const T& x)
+    {
+        return PrettyPrint<T>::toString(x);
+    }
+
 }
+
+#endif

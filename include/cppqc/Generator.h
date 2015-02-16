@@ -41,7 +41,7 @@ namespace cppqc {
 
 typedef boost::mt19937 RngEngine;
 
-template<class T> class Arbitrary;
+template<class T> struct Arbitrary;
 
 /*
  * When creating user defined generators, they must model a
@@ -88,9 +88,9 @@ namespace detail {
         virtual ~StatelessGenConcept()
         {
         }
-        virtual T unGen(RngEngine &, std::size_t) const = 0;
-        virtual std::vector<T> shrink(const T &) const = 0;
-        virtual StatelessGenConcept *clone() const = 0;
+        virtual T unGen(RngEngine &, std::size_t) override = 0;
+        virtual std::vector<T> shrink(const T &) override = 0;
+        virtual StatelessGenConcept *clone() const override = 0;
     };
 }
 
@@ -151,7 +151,7 @@ class StatelessGenerator
         class StatelessGenModel : public detail::StatelessGenConcept<T>
         {
             public:
-                StatelessGenModel(const StatelessGeneratorModel &gm) : m_obj(gm)
+                StatelessGenModel(StatelessGeneratorModel gm) : m_obj(std::move(gm))
                 {
                 }
 
@@ -254,21 +254,21 @@ class Generator
         class GenModel : public detail::GenConcept<T>
         {
             public:
-                GenModel(const GeneratorModel &gm) : m_obj(gm)
+                GenModel(GeneratorModel gm) : m_obj(std::move(gm))
                 {
                 }
 
-                T unGen(RngEngine &rng, std::size_t size)
+                T unGen(RngEngine &rng, std::size_t size) override
                 {
                     return m_obj.unGen(rng, size);
                 }
 
-                std::vector<T> shrink(const T &x)
+                std::vector<T> shrink(const T &x) override
                 {
                     return m_obj.shrink(x);
                 }
 
-                detail::GenConcept<T> *clone() const
+                detail::GenConcept<T> *clone() const override
                 {
                     return new GenModel(m_obj);
                 }
@@ -289,7 +289,7 @@ std::vector<T> sample(const Generator<T> &g, std::size_t num = 0,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     std::vector<T> ret;
     ret.reserve(num);
@@ -310,7 +310,7 @@ void sampleOutput(const Generator<T> &g,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     try {
         for (std::size_t i = 0; i < num; ++i) {
@@ -332,7 +332,7 @@ std::vector<std::pair<T, std::vector<T> > > sampleShrink(const Generator<T> &g,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     std::vector<std::pair<T, std::vector<T> > > ret;
     ret.reserve(num);
@@ -355,7 +355,7 @@ void sampleShrinkOutput(const Generator<T> &g, std::ostream &out,
     if (num == 0)
         num = 20;
     if (seed == 0)
-        seed = time(0);
+        seed = time(nullptr);
     RngEngine rng(seed);
     try {
         for (std::size_t i = 0; i < num; ++i) {
@@ -1043,18 +1043,31 @@ namespace detail {
                 return ret;
             }
 
-            std::vector<std::vector<T> > shrink(const std::vector<T> &x) const
+            std::vector<std::vector<T>> shrink(const std::vector<T> &v) const
             {
-                std::vector<std::vector<T> > ret;
-                ret.reserve(x.size());
-                for (typename std::vector<T>::const_iterator it = x.begin();
-                        it != x.end(); ++it) {
-                    ret.push_back(std::vector<T>());
-                    ret.back().reserve(x.size() - 1);
-                    ret.back().insert(ret.back().end(), x.begin(), it);
-                    ret.back().insert(ret.back().end(), it + 1, x.end());
+                std::vector<std::vector<T>> result;
+
+                // 1) leave one element out (reduces size of new arrays by one)
+                for(auto it = v.begin(); it != v.end(); ++it) {
+                    typename std::vector<T> shortendV;
+                    shortendV.reserve(v.size() - 1);
+                    shortendV.insert(shortendV.end(), v.begin(), it);
+                    shortendV.insert(shortendV.end(), it + 1, v.end());
+                    assert(shortendV.size() == v.size() - 1);
+                    result.push_back(std::move(shortendV));
                 }
-                return ret;
+
+                // 2) shrink each element
+                //    (array size stays the same but inner elements shrink)
+                for(int i = 0; i < static_cast<int>(v.size()); ++i) {
+                    typename std::vector<T> shrinkedTypes = Arbitrary<T>::shrink(v[i]);
+                    for(T &shrinked : Arbitrary<T>::shrink(v[i])) {
+                        auto copy = v;
+                        copy[i] = std::move(shrinked);
+                        result.push_back(std::move(copy));
+                    }
+                }
+                return result;
             }
 
         private:
@@ -1065,7 +1078,7 @@ namespace detail {
 /// Generates an std::vector of random length. The maximum length depends on the
 /// generation size parameter. Shrinks by removing elements from the vector.
 template<class T>
-StatelessGenerator<std::vector<T> > listOf(
+StatelessGenerator<std::vector<T>> listOf(
         const StatelessGenerator<T> &g = Arbitrary<T>())
 {
     return detail::ListOfStatelessGenerator<T>(g);
@@ -1078,40 +1091,34 @@ namespace detail {
     {
         public:
             ListOfNonEmptyStatelessGenerator(const StatelessGenerator<T> &g) :
-                m_gen(g)
+                m_gen(g), m_vectorGen(listOf<T>(g))
             {
             }
 
             std::vector<T> unGen(RngEngine &rng, std::size_t size) const
             {
-                boost::uniform_int<std::size_t> dist(1,
-                        std::max<std::size_t>(1, size));
-                std::size_t n = dist(rng);
-                std::vector<T> ret;
-                ret.reserve(n);
-                while (n-- > 0)
-                    ret.push_back(m_gen.unGen(rng, size));
-                return ret;
+                std::vector<T> result = m_vectorGen.unGen(rng, size);
+                if (result.empty())
+                    result.emplace_back(m_gen.unGen(rng, size));
+                return result;
             }
 
-            std::vector<std::vector<T> > shrink(const std::vector<T> &x) const
+            std::vector<std::vector<T>> shrink(const std::vector<T> &x) const
             {
-                std::vector<std::vector<T> > ret;
-                if (x.size() == 1)
-                    return ret;
-                ret.reserve(x.size());
-                for (typename std::vector<T>::const_iterator it = x.begin();
-                        it != x.end(); ++it) {
-                    ret.push_back(std::vector<T>());
-                    ret.back().reserve(x.size() - 1);
-                    ret.back().insert(ret.back().end(), x.begin(), it);
-                    ret.back().insert(ret.back().end(), it + 1, x.end());
-                }
-                return ret;
+                assert(!x.empty());
+
+                // TODO: should work for now, but uses (too much?!) internal
+                //       knowledge of the "ListOfStatelessGenerator"
+                //       shrink function implementation
+                if (x.size() > 1)
+                    return m_vectorGen.shrink(x);
+                else
+                    return {};
             }
 
         private:
             const StatelessGenerator<T> m_gen;
+            const StatelessGenerator<std::vector<T>> m_vectorGen;
     };
 }
 
@@ -1119,7 +1126,7 @@ namespace detail {
 /// depends on the generation size parameter. Shrinks by removing elements from
 /// the vector.
 template<class T>
-StatelessGenerator<std::vector<T> > listOfNonEmpty(
+StatelessGenerator<std::vector<T>> listOfNonEmpty(
         const StatelessGenerator<T> &g = Arbitrary<T>())
 {
     return detail::ListOfNonEmptyStatelessGenerator<T>(g);

@@ -46,44 +46,28 @@ void selection_sort(InputIterator b, InputIterator e, bool make_mistakes = false
         std::swap(*(std::min_element(c, e)), *c);
     }
 }
-    
+
 }
 
-namespace std {
-    std::ostream &operator<<(std::ostream &out, const std::vector<int> &v)
-    {
-        out << "[";
-        for (std::vector<int>::const_iterator it = v.begin(); it != v.end();
-                ++it) {
-            if (it != v.begin())
-                out << ", ";
-            out << *it;
-        }
-        out << "]";
-        return out;
-    }
-}
-
-struct PropTestSort: cppqc::Property<std::vector<int> >
+struct PropTestSort: cppqc::Property<std::vector<int>>
 {
-    PropTestSort() : Property(cppqc::listOf<int>()) {}
-    bool check(const std::vector<int> &v) const
+    bool check(const std::vector<int> &v) const override
     {
         std::vector<int> v_copy(v);
         uut::selection_sort(std::begin(v_copy), std::end(v_copy), true);
         return std::is_sorted(std::begin(v_copy), std::end(v_copy));
     }
-    std::string name() const
+    std::string name() const override
     {
         return "Sorting should be sorted";
     }
-    std::string classify(const std::vector<int> &v) const
+    std::string classify(const std::vector<int> &v) const override
     {
         std::ostringstream sstr;
         sstr << "size " << v.size();
         return sstr.str();
     }
-    bool trivial(const std::vector<int> &v) const
+    bool trivial(const std::vector<int> &v) const override
     {
         return v.empty() || v.size() == 1;
     }

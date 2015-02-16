@@ -74,7 +74,7 @@ Integral arbitrarySizedBoundedIntegral(RngEngine &rng, std::size_t size)
 template<class Real>
 Real arbitrarySizedReal(RngEngine &rng, std::size_t size)
 {
-    boost::uniform_real<Real> dist(-Real(size), Real(size));
+    boost::uniform_real<Real> dist(-Real(size + 1.0), Real(size + 1.0));
     return dist(rng);
 }
 
@@ -141,7 +141,7 @@ ArbitraryImpl<T>::shrink;
 
 // included specializations
 
-inline bool arbitraryBool(RngEngine &rng, std::size_t size)
+inline bool arbitraryBool(RngEngine &rng, std::size_t /*size*/)
 {
     if (boost::uniform_smallint<int>(0, 1)(rng))
         return true;
@@ -247,9 +247,9 @@ inline std::vector<char> shrinkChar(char c)
     const char possShrinks[] = {'a', 'b', 'c', 'A', 'B', 'C', '1', '2', '3',
         ' ', '\n', '\0'};
     std::vector<char> ret;
-    for (std::size_t i = 0; i < sizeof(possShrinks); ++i) {
-        if (possShrinks[i] < c)
-            ret.push_back(possShrinks[i]);
+    for (auto & possShrink : possShrinks) {
+        if (possShrink < c)
+            ret.push_back(possShrink);
     }
     if (isupper(c) &&
             std::find(possShrinks, possShrinks + sizeof(possShrinks),
@@ -350,7 +350,28 @@ template<class T1, class T2>
 const typename Arbitrary<std::pair<T1, T2> >::shrinkType
 ArbitraryImpl<std::pair<T1, T2> >::shrink = shrinkPair<std::pair<T1, T2> >;
 
+template<typename T>
+struct ArbitraryImpl<std::vector<T>>
+{
+  static const typename Arbitrary<std::vector<T>>::unGenType unGen;
+  static const typename Arbitrary<std::vector<T>>::shrinkType shrink;
+};
 
+template <typename T>
+const typename Arbitrary<std::vector<T>>::unGenType
+    ArbitraryImpl<std::vector<T>>::unGen = [](RngEngine &rng,
+                                              std::size_t size) {
+    const auto& vectorGenerator = listOf<T>();
+    return vectorGenerator.unGen(rng, size);
+};
+
+template <typename T>
+const typename Arbitrary<std::vector<T>>::shrinkType
+    ArbitraryImpl<std::vector<T>>::shrink = [](const std::vector<T> &v) {
+
+    const auto& vectorGenerator = listOf<T>();
+    return vectorGenerator.shrink(v);
+};
 }
 
 #endif
