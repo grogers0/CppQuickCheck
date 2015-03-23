@@ -381,6 +381,50 @@ const typename Arbitrary<std::vector<T>>::shrinkType
     const auto& vectorGenerator = listOf<T>();
     return vectorGenerator.shrink(v);
 };
+
+template<class T, unsigned long N>
+struct ArbitraryImpl<std::array<T, N>>
+{
+  static const typename Arbitrary<std::array<T, N>>::unGenType unGen;
+  static const typename Arbitrary<std::array<T, N>>::shrinkType shrink;
+};
+
+template<class T, unsigned long N>
+std::array<T, N> vectorToArray(const std::vector<T> &vec)
+{
+    std::array<T, N> arr;
+    std::copy_n(vec.begin(), std::min(vec.size(), arr.size()), arr.begin());
+    return arr;
+}
+
+template<class T, unsigned long N>
+std::vector<T> arrayToVector(const std::array<T, N> &arr)
+{
+    std::vector<T> vec(N);
+    std::copy(arr.begin(), arr.end(), vec.begin());
+    return vec;
+}
+
+template<class T, unsigned long N>
+const typename Arbitrary<std::array<T, N>>::unGenType
+    ArbitraryImpl<std::array<T, N>>::unGen = [](RngEngine &rng, std::size_t size)
+{
+    const auto& vectorGenerator = vectorOf<T>(N);
+    return vectorToArray<T, N>(vectorGenerator.unGen(rng, size));
+};
+
+template<class T, unsigned long N>
+const typename Arbitrary<std::array<T, N>>::shrinkType
+    ArbitraryImpl<std::array<T, N>>::shrink = [](const std::array<T, N> &a)
+{
+    const auto& vectorGenerator = vectorOf<T>(N);
+    auto shrinked = vectorGenerator.shrink(arrayToVector<T, N>(a));
+    std::vector<std::array<T, N>> arrays;
+    for (auto iter = shrinked.begin(); iter != shrinked.end(); ++iter)
+        arrays.push_back(vectorToArray<T, N>(*iter));
+    return arrays;
+};
+
 }
 
 #endif
