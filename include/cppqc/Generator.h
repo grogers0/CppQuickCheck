@@ -1134,6 +1134,58 @@ StatelessGenerator<std::vector<T>> listOfNonEmpty(
 
 
 namespace detail {
+    template<class T, std::size_t N>
+    class ArrayOfStatelessGenerator
+    {
+        public:
+            ArrayOfStatelessGenerator(const StatelessGenerator<T> &g) :
+                m_gen(g)
+            {
+            }
+
+            std::array<T, N> unGen(RngEngine &rng, std::size_t size) const
+            {
+                std::array<T, N> result;
+                for (size_t i = 0; i < N; i++)
+                    result[i] = m_gen.unGen(rng, size);
+                return result;
+            }
+
+            std::vector<std::array<T, N>> shrink(
+                    const std::array<T, N> &arr) const
+            {
+                std::vector<std::array<T, N>> result;
+
+                // shrink each element
+                // (array size stays the same but inner elements shrink)
+                for (size_t i = 0; i < N; i++) {
+                    for (auto &shrinkedInnerElem : m_gen.shrink(arr[i])) {
+                        auto copy = arr;
+                        copy[i] = std::move(shrinkedInnerElem);
+                        result.push_back(std::move(copy));
+                    }
+                }
+
+                return result;
+            }
+
+        private:
+            const StatelessGenerator<T> m_gen;
+    };
+}
+
+/// Generates an std::array of fixed length N.
+/// As the array's length is fixed, it cannot be shrunken.
+/// However, its inner elements can be.
+template<class T, std::size_t N>
+StatelessGenerator<std::array<T, N>> arrayOf(
+        const StatelessGenerator<T> &g = Arbitrary<T>())
+{
+    return detail::ArrayOfStatelessGenerator<T, N>(g);
+}
+
+
+namespace detail {
     template<class T>
     class VectorOfStatelessGenerator
     {

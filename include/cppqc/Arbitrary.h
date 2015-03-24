@@ -381,6 +381,36 @@ const typename Arbitrary<std::vector<T>>::shrinkType
     const auto& vectorGenerator = listOf<T>();
     return vectorGenerator.shrink(v);
 };
+
+
+template<typename T, std::size_t N>
+struct ArbitraryImpl<std::array<T, N>>
+{
+    static const typename Arbitrary<std::array<T, N>>::unGenType unGen;
+    static const typename Arbitrary<std::array<T, N>>::shrinkType shrink;
+};
+
+/// Note: N is the fixed size of the array.
+/// It differs from the "size" param in the "unGen" function:
+///
+/// If "size" is increased, the output array will still contain
+/// N elements, but each element will, in general, be more complex.
+template <typename T, std::size_t N>
+const typename Arbitrary<std::array<T, N>>::unGenType
+    ArbitraryImpl<std::array<T, N>>::unGen = [](RngEngine &rng,
+                                              std::size_t size) {
+    const auto& arrayGenerator = arrayOf<T, N>();
+    return arrayGenerator.unGen(rng, size);
+};
+
+template <typename T, std::size_t N>
+const typename Arbitrary<std::array<T, N>>::shrinkType
+    ArbitraryImpl<std::array<T, N>>::shrink = [](const std::array<T, N> &arr) {
+
+    const auto& arrayGenerator = arrayOf<T, N>();
+    return arrayGenerator.shrink(arr);
+};
+
 }
 
 #endif
