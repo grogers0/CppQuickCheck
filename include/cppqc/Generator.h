@@ -1159,9 +1159,9 @@ namespace detail {
                 // shrink each element
                 // (array size stays the same but inner elements shrink)
                 for (size_t i = 0; i < N; i++) {
-                    for (auto &shrinkedInnerElem : m_gen.shrink(arr[i])) {
+                    for (const auto &shrinkedInnerElem : m_gen.shrink(arr[i])) {
                         auto copy = arr;
-                        copy[i] = std::move(shrinkedInnerElem);
+                        copy[i] = shrinkedInnerElem;
                         result.push_back(std::move(copy));
                     }
                 }

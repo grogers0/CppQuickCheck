@@ -46,7 +46,24 @@ struct PropTestArrayReverse :
     }
 };
 
+struct PropTestBoolArrayReverse :
+    cppqc::Property<std::array<bool, ArraySize>>
+{
+    bool check(const std::array<bool, ArraySize> &v) const override
+    {
+        auto vrev = v;
+        std::reverse(vrev.begin(), vrev.end());
+        std::reverse(vrev.begin(), vrev.end());
+        return std::equal(v.begin(), v.end(), vrev.begin());
+    }
+    std::string name() const override
+    {
+        return "Reversing Twice is Identity";
+    }
+};
+
 int main()
 {
     cppqc::quickCheckOutput(PropTestArrayReverse());
+    cppqc::quickCheckOutput(PropTestBoolArrayReverse());
 }
