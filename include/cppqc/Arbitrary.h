@@ -101,6 +101,8 @@ template<class Real>
 std::vector<Real> shrinkReal(Real x)
 {
     std::vector<Real> ret;
+    if (x == 0)
+        return ret;
     if (x < 0)
         ret.push_back(-x);
     ret.push_back(Real(0));
