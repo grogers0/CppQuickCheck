@@ -29,7 +29,8 @@
 #include <boost/function.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/mersenne_twister.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
+#include <utility>
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
@@ -71,6 +72,7 @@ template<class T> struct Arbitrary;
 
 
 namespace detail {
+
     template<class T>
     struct GenConcept
     {
@@ -1228,889 +1230,112 @@ StatelessGenerator<std::vector<T> > vectorOf(std::size_t size,
 
 
 namespace detail {
-    struct null_type {};
 
-    template<class T0, class T1 = null_type, class T2 = null_type,
-        class T3 = null_type, class T4 = null_type, class T5 = null_type,
-        class T6 = null_type, class T7 = null_type, class T8 = null_type,
-        class T9 = null_type>
-    class TupleGenerator
+    template<int offset, typename T, typename... Ts>
+    struct TupleGeneratorHelper_unGen
     {
-            typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>
-                tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3,
-                    const Generator<T4> &g4, const Generator<T5> &g5,
-                    const Generator<T6> &g6, const Generator<T7> &g7,
-                    const Generator<T8> &g8, const Generator<T9> &g9) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3), m_gen4(g4),
-                m_gen5(g5), m_gen6(g6), m_gen7(g7), m_gen8(g8), m_gen9(g9)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size), m_gen4.unGen(rng, size),
-                        m_gen5.unGen(rng, size), m_gen6.unGen(rng, size),
-                        m_gen7.unGen(rng, size), m_gen8.unGen(rng, size),
-                        m_gen9.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<T4> shrinks4 = m_gen4.shrink(boost::get<4>(x));
-                std::vector<T5> shrinks5 = m_gen5.shrink(boost::get<5>(x));
-                std::vector<T6> shrinks6 = m_gen6.shrink(boost::get<6>(x));
-                std::vector<T7> shrinks7 = m_gen7.shrink(boost::get<7>(x));
-                std::vector<T8> shrinks8 = m_gen8.shrink(boost::get<8>(x));
-                std::vector<T9> shrinks9 = m_gen9.shrink(boost::get<9>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size() + shrinks4.size() +
-                        shrinks5.size() + shrinks6.size() + shrinks7.size() +
-                        shrinks8.size() + shrinks9.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it,
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T4>::const_iterator it =
-                        shrinks4.begin(); it != shrinks4.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), *it, boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T5>::const_iterator it =
-                        shrinks5.begin(); it != shrinks5.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x), *it,
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T6>::const_iterator it =
-                        shrinks6.begin(); it != shrinks6.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), *it, boost::get<7>(x),
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T7>::const_iterator it =
-                        shrinks7.begin(); it != shrinks7.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), boost::get<6>(x), *it,
-                                boost::get<8>(x), boost::get<9>(x)));
-                for (typename std::vector<T8>::const_iterator it =
-                        shrinks8.begin(); it != shrinks8.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), boost::get<6>(x),
-                                boost::get<7>(x), *it, boost::get<9>(x)));
-                for (typename std::vector<T9>::const_iterator it =
-                        shrinks9.begin(); it != shrinks9.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), boost::get<6>(x),
-                                boost::get<7>(x), boost::get<8>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-            const Generator<T4> m_gen4;
-            const Generator<T5> m_gen5;
-            const Generator<T6> m_gen6;
-            const Generator<T7> m_gen7;
-            const Generator<T8> m_gen8;
-            const Generator<T9> m_gen9;
+        template <typename Generators>
+        static std::tuple<T, Ts...> unGen(RngEngine &rng, std::size_t size,
+                                          const Generators &generators)
+        {
+            return std::tuple_cat(
+                std::make_tuple(std::get<offset>(generators).unGen(rng, size)),
+                TupleGeneratorHelper_unGen<
+                    offset + 1, Ts...>::unGen(rng, size, generators));
+        }
     };
 
-    template<class T0, class T1, class T2, class T3, class T4,
-        class T5, class T6, class T7, class T8>
-    class TupleGenerator<T0, T1, T2, T3, T4, T5, T6, T7, T8, null_type>
+    template<int offset, typename T>
+    struct TupleGeneratorHelper_unGen<offset, T>
     {
-            typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3,
-                    const Generator<T4> &g4, const Generator<T5> &g5,
-                    const Generator<T6> &g6, const Generator<T7> &g7,
-                    const Generator<T8> &g8) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3), m_gen4(g4),
-                m_gen5(g5), m_gen6(g6), m_gen7(g7), m_gen8(g8)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size), m_gen4.unGen(rng, size),
-                        m_gen5.unGen(rng, size), m_gen6.unGen(rng, size),
-                        m_gen7.unGen(rng, size), m_gen8.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<T4> shrinks4 = m_gen4.shrink(boost::get<4>(x));
-                std::vector<T5> shrinks5 = m_gen5.shrink(boost::get<5>(x));
-                std::vector<T6> shrinks6 = m_gen6.shrink(boost::get<6>(x));
-                std::vector<T7> shrinks7 = m_gen7.shrink(boost::get<7>(x));
-                std::vector<T8> shrinks8 = m_gen8.shrink(boost::get<8>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size() + shrinks4.size() +
-                        shrinks5.size() + shrinks6.size() + shrinks7.size() +
-                        shrinks8.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it,
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T4>::const_iterator it =
-                        shrinks4.begin(); it != shrinks4.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), *it, boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T5>::const_iterator it =
-                        shrinks5.begin(); it != shrinks5.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x), *it,
-                                boost::get<6>(x), boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T6>::const_iterator it =
-                        shrinks6.begin(); it != shrinks6.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), *it, boost::get<7>(x),
-                                boost::get<8>(x)));
-                for (typename std::vector<T7>::const_iterator it =
-                        shrinks7.begin(); it != shrinks7.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), boost::get<6>(x), *it,
-                                boost::get<8>(x)));
-                for (typename std::vector<T8>::const_iterator it =
-                        shrinks8.begin(); it != shrinks8.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), boost::get<6>(x),
-                                boost::get<7>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-            const Generator<T4> m_gen4;
-            const Generator<T5> m_gen5;
-            const Generator<T6> m_gen6;
-            const Generator<T7> m_gen7;
-            const Generator<T8> m_gen8;
+        template <typename Generators>
+        static std::tuple<T> unGen(RngEngine &rng, std::size_t size,
+                                   const Generators &generators)
+        {
+            return std::tuple<T>(std::get<offset>(generators).unGen(rng, size));
+        }
     };
 
-    template<class T0, class T1, class T2, class T3, class T4,
-        class T5, class T6, class T7>
-    class TupleGenerator<T0, T1, T2, T3, T4, T5, T6, T7, null_type, null_type>
+    template<int offset, typename... T>
+    struct TupleGeneratorHelper_shrink
     {
-            typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3,
-                    const Generator<T4> &g4, const Generator<T5> &g5,
-                    const Generator<T6> &g6, const Generator<T7> &g7) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3), m_gen4(g4),
-                m_gen5(g5), m_gen6(g6), m_gen7(g7)
-            {
+        template <typename Generators>
+        static void appendShrinks(const std::tuple<T...> &shrinkInput,
+                                  std::vector<std::tuple<T...>>& shrinkOutput,
+                                  const Generators &generators)
+        {
+            // Compute all shrink combinations for the tuple
+            // element at the position "offset".
+            // All other elements will not be changed.
+            static_assert(offset >= 0 && offset < sizeof...(T),
+                          "offset out of bounds");
+            auto allLocalShrinks =
+                std::get<offset>(generators).shrink(std::get<offset>(shrinkInput));
+            for (auto&& localShrink : allLocalShrinks) {
+                auto copiedShrinkInput = shrinkInput;
+                std::get<offset>(copiedShrinkInput) = std::move(localShrink);
+                shrinkOutput.push_back(std::move(copiedShrinkInput));
             }
 
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size), m_gen4.unGen(rng, size),
-                        m_gen5.unGen(rng, size), m_gen6.unGen(rng, size),
-                        m_gen7.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<T4> shrinks4 = m_gen4.shrink(boost::get<4>(x));
-                std::vector<T5> shrinks5 = m_gen5.shrink(boost::get<5>(x));
-                std::vector<T6> shrinks6 = m_gen6.shrink(boost::get<6>(x));
-                std::vector<T7> shrinks7 = m_gen7.shrink(boost::get<7>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size() + shrinks4.size() +
-                        shrinks5.size() + shrinks6.size() + shrinks7.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it,
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x)));
-                for (typename std::vector<T4>::const_iterator it =
-                        shrinks4.begin(); it != shrinks4.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), *it, boost::get<5>(x),
-                                boost::get<6>(x), boost::get<7>(x)));
-                for (typename std::vector<T5>::const_iterator it =
-                        shrinks5.begin(); it != shrinks5.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x), *it,
-                                boost::get<6>(x), boost::get<7>(x)));
-                for (typename std::vector<T6>::const_iterator it =
-                        shrinks6.begin(); it != shrinks6.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), *it, boost::get<7>(x)));
-                for (typename std::vector<T7>::const_iterator it =
-                        shrinks7.begin(); it != shrinks7.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), boost::get<6>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-            const Generator<T4> m_gen4;
-            const Generator<T5> m_gen5;
-            const Generator<T6> m_gen6;
-            const Generator<T7> m_gen7;
+            // continue recursion (for right to left)
+            TupleGeneratorHelper_shrink<offset - 1, T...>::appendShrinks(
+                shrinkInput, shrinkOutput, generators);
+        }
     };
 
-    template<class T0, class T1, class T2, class T3, class T4,
-        class T5, class T6>
-    class TupleGenerator<T0, T1, T2, T3, T4, T5, T6,
-        null_type, null_type, null_type>
+    template<typename... T>
+    struct TupleGeneratorHelper_shrink<-1, T...>
     {
-            typedef boost::tuple<T0, T1, T2, T3, T4, T5, T6> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3,
-                    const Generator<T4> &g4, const Generator<T5> &g5,
-                    const Generator<T6> &g6) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3), m_gen4(g4),
-                m_gen5(g5), m_gen6(g6)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size), m_gen4.unGen(rng, size),
-                        m_gen5.unGen(rng, size), m_gen6.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<T4> shrinks4 = m_gen4.shrink(boost::get<4>(x));
-                std::vector<T5> shrinks5 = m_gen5.shrink(boost::get<5>(x));
-                std::vector<T6> shrinks6 = m_gen6.shrink(boost::get<6>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size() + shrinks4.size() +
-                        shrinks5.size() + shrinks6.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it,
-                                boost::get<4>(x), boost::get<5>(x),
-                                boost::get<6>(x)));
-                for (typename std::vector<T4>::const_iterator it =
-                        shrinks4.begin(); it != shrinks4.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), *it, boost::get<5>(x),
-                                boost::get<6>(x)));
-                for (typename std::vector<T5>::const_iterator it =
-                        shrinks5.begin(); it != shrinks5.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x), *it,
-                                boost::get<6>(x)));
-                for (typename std::vector<T6>::const_iterator it =
-                        shrinks6.begin(); it != shrinks6.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x),
-                                boost::get<5>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-            const Generator<T4> m_gen4;
-            const Generator<T5> m_gen5;
-            const Generator<T6> m_gen6;
+        template <typename Generators>
+        static void appendShrinks(const std::tuple<T...> & /*shrinkInput*/,
+                                  std::vector<std::tuple<T...>> & /*shrinkOutput*/,
+                                  const Generators & /*generators*/)
+        {
+            // nothing to do (end of recursion)
+        }
     };
 
-    template<class T0, class T1, class T2, class T3, class T4,
-        class T5>
-    class TupleGenerator<T0, T1, T2, T3, T4, T5,
-        null_type, null_type, null_type, null_type>
+    template<typename... T>
+    struct TupleGenerator
     {
-            typedef boost::tuple<T0, T1, T2, T3, T4, T5> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3,
-                    const Generator<T4> &g4, const Generator<T5> &g5) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3), m_gen4(g4),
-                m_gen5(g5)
-            {
-            }
+        TupleGenerator(const Generator<T> &...g) :
+            m_gen(g...)
+        {
+        }
 
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size), m_gen4.unGen(rng, size),
-                        m_gen5.unGen(rng, size));
-            }
+        std::tuple<T...> unGen(RngEngine &rng, std::size_t size) const
+        {
+            return TupleGeneratorHelper_unGen<0, T...>::unGen(rng, size, m_gen);
+        }
 
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<T4> shrinks4 = m_gen4.shrink(boost::get<4>(x));
-                std::vector<T5> shrinks5 = m_gen5.shrink(boost::get<5>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size() + shrinks4.size() +
-                        shrinks5.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x),
-                                boost::get<4>(x), boost::get<5>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it,
-                                boost::get<4>(x), boost::get<5>(x)));
-                for (typename std::vector<T4>::const_iterator it =
-                        shrinks4.begin(); it != shrinks4.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), *it, boost::get<5>(x)));
-                for (typename std::vector<T5>::const_iterator it =
-                        shrinks5.begin(); it != shrinks5.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), boost::get<4>(x), *it));
-                return ret;
-            }
+        std::vector<std::tuple<T...>> shrink(const std::tuple<T...> &shrinkInput) const
+        {
+            std::vector<std::tuple<T...>> shrinkOutput;
+            constexpr auto last_index = sizeof...(T) - 1;
+            TupleGeneratorHelper_shrink<last_index, T...>::appendShrinks(
+                shrinkInput, shrinkOutput, m_gen);
+            return shrinkOutput;
+        }
 
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-            const Generator<T4> m_gen4;
-            const Generator<T5> m_gen5;
+    private:
+        std::tuple<Generator<T>...> m_gen;
     };
 
-    template<class T0, class T1, class T2, class T3, class T4>
-    class TupleGenerator<T0, T1, T2, T3, T4,
-          null_type, null_type, null_type, null_type, null_type>
-    {
-            typedef boost::tuple<T0, T1, T2, T3, T4> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3,
-                    const Generator<T4> &g4) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3), m_gen4(g4)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size), m_gen4.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<T4> shrinks4 = m_gen4.shrink(boost::get<4>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size() + shrinks4.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x),
-                                boost::get<4>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x),
-                                boost::get<4>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it,
-                                boost::get<4>(x)));
-                for (typename std::vector<T4>::const_iterator it =
-                        shrinks4.begin(); it != shrinks4.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x),
-                                boost::get<3>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-            const Generator<T4> m_gen4;
-    };
-
-    template<class T0, class T1, class T2, class T3>
-    class TupleGenerator<T0, T1, T2, T3, null_type,
-          null_type, null_type, null_type, null_type, null_type>
-    {
-            typedef boost::tuple<T0, T1, T2, T3> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2, const Generator<T3> &g3) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2), m_gen3(g3)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size),
-                        m_gen3.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<T3> shrinks3 = m_gen3.shrink(boost::get<3>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size() + shrinks3.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x), boost::get<3>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x), boost::get<3>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it, boost::get<3>(x)));
-                for (typename std::vector<T3>::const_iterator it =
-                        shrinks3.begin(); it != shrinks3.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), boost::get<2>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-            const Generator<T3> m_gen3;
-    };
-
-    template<class T0, class T1, class T2>
-    class TupleGenerator<T0, T1, T2, null_type, null_type,
-          null_type, null_type, null_type, null_type, null_type>
-    {
-            typedef boost::tuple<T0, T1, T2> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1,
-                    const Generator<T2> &g2) :
-                m_gen0(g0), m_gen1(g1), m_gen2(g2)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size), m_gen2.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<T2> shrinks2 = m_gen2.shrink(boost::get<2>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size() +
-                        shrinks2.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x),
-                                boost::get<2>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it,
-                                boost::get<2>(x)));
-                for (typename std::vector<T2>::const_iterator it =
-                        shrinks2.begin(); it != shrinks2.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x),
-                                boost::get<1>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-            const Generator<T2> m_gen2;
-    };
-
-    template<class T0, class T1>
-    class TupleGenerator<T0, T1, null_type, null_type, null_type,
-          null_type, null_type, null_type, null_type, null_type>
-    {
-            typedef boost::tuple<T0, T1> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0, const Generator<T1> &g1) :
-                m_gen0(g0), m_gen1(g1)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size),
-                        m_gen1.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<T1> shrinks1 = m_gen1.shrink(boost::get<1>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size() + shrinks1.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it, boost::get<1>(x)));
-                for (typename std::vector<T1>::const_iterator it =
-                        shrinks1.begin(); it != shrinks1.end(); ++it)
-                    ret.push_back(tuple_type(boost::get<0>(x), *it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-            const Generator<T1> m_gen1;
-    };
-
-    template<class T0>
-    class TupleGenerator<T0, null_type, null_type, null_type, null_type,
-          null_type, null_type, null_type, null_type, null_type>
-    {
-            typedef boost::tuple<T0> tuple_type;
-        public:
-            TupleGenerator(const Generator<T0> &g0) :
-                m_gen0(g0)
-            {
-            }
-
-            tuple_type unGen(RngEngine &rng, std::size_t size)
-            {
-                return tuple_type(m_gen0.unGen(rng, size));
-            }
-
-            std::vector<tuple_type> shrink(const tuple_type &x)
-            {
-                std::vector<T0> shrinks0 = m_gen0.shrink(boost::get<0>(x));
-                std::vector<tuple_type> ret;
-                ret.reserve(shrinks0.size());
-                for (typename std::vector<T0>::const_iterator it =
-                        shrinks0.begin(); it != shrinks0.end(); ++it)
-                    ret.push_back(tuple_type(*it));
-                return ret;
-            }
-
-        private:
-            const Generator<T0> m_gen0;
-    };
 }
 
-template<class T0>
-Generator<boost::tuple<T0> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>())
+template<typename... T>
+Generator<std::tuple<T...>> tupleOf(const Generator<T> &...g)
 {
-    return detail::TupleGenerator<T0>(g0);
+    return detail::TupleGenerator<T...>(g...);
 }
 
-template<class T0, class T1>
-Generator<boost::tuple<T0, T1> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>())
+template<typename... T>
+Generator<std::tuple<T...>> tupleOf()
 {
-    return detail::TupleGenerator<T0, T1>(g0, g1);
+    return detail::TupleGenerator<T...>(Arbitrary<T>()...);
 }
 
-template<class T0, class T1, class T2>
-Generator<boost::tuple<T0, T1, T2> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>())
-{
-    return detail::TupleGenerator<T0, T1, T2>(g0, g1, g2);
-}
-
-template<class T0, class T1, class T2, class T3>
-Generator<boost::tuple<T0, T1, T2, T3> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3>(g0, g1, g2, g3);
-}
-
-template<class T0, class T1, class T2, class T3, class T4>
-Generator<boost::tuple<T0, T1, T2, T3, T4> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>(),
-        const Generator<T4> &g4 = Arbitrary<T4>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3, T4>(g0, g1, g2, g3, g4);
-}
-
-template<class T0, class T1, class T2, class T3, class T4, class T5>
-Generator<boost::tuple<T0, T1, T2, T3, T4, T5> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>(),
-        const Generator<T4> &g4 = Arbitrary<T4>(),
-        const Generator<T5> &g5 = Arbitrary<T5>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3, T4, T5>(
-            g0, g1, g2, g3, g4, g5);
-}
-
-template<class T0, class T1, class T2, class T3, class T4, class T5, class T6>
-Generator<boost::tuple<T0, T1, T2, T3, T4, T5, T6> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>(),
-        const Generator<T4> &g4 = Arbitrary<T4>(),
-        const Generator<T5> &g5 = Arbitrary<T5>(),
-        const Generator<T6> &g6 = Arbitrary<T6>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3, T4, T5, T6>(
-            g0, g1, g2, g3, g4, g5, g6);
-}
-
-template<class T0, class T1, class T2, class T3, class T4,
-    class T5, class T6, class T7>
-Generator<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>(),
-        const Generator<T4> &g4 = Arbitrary<T4>(),
-        const Generator<T5> &g5 = Arbitrary<T5>(),
-        const Generator<T6> &g6 = Arbitrary<T6>(),
-        const Generator<T7> &g7 = Arbitrary<T7>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3, T4, T5, T6, T7>(
-            g0, g1, g2, g3, g4, g5, g6, g7);
-}
-
-template<class T0, class T1, class T2, class T3, class T4,
-    class T5, class T6, class T7, class T8>
-Generator<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>(),
-        const Generator<T4> &g4 = Arbitrary<T4>(),
-        const Generator<T5> &g5 = Arbitrary<T5>(),
-        const Generator<T6> &g6 = Arbitrary<T6>(),
-        const Generator<T7> &g7 = Arbitrary<T7>(),
-        const Generator<T8> &g8 = Arbitrary<T8>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3, T4, T5, T6, T7, T8>(
-            g0, g1, g2, g3, g4, g5, g6, g7, g8);
-}
-
-template<class T0, class T1, class T2, class T3, class T4,
-    class T5, class T6, class T7, class T8, class T9>
-Generator<boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8> >
-tupleOf(const Generator<T0> &g0 = Arbitrary<T0>(),
-        const Generator<T1> &g1 = Arbitrary<T1>(),
-        const Generator<T2> &g2 = Arbitrary<T2>(),
-        const Generator<T3> &g3 = Arbitrary<T3>(),
-        const Generator<T4> &g4 = Arbitrary<T4>(),
-        const Generator<T5> &g5 = Arbitrary<T5>(),
-        const Generator<T6> &g6 = Arbitrary<T6>(),
-        const Generator<T7> &g7 = Arbitrary<T7>(),
-        const Generator<T8> &g8 = Arbitrary<T8>(),
-        const Generator<T9> &g9 = Arbitrary<T9>())
-{
-    return detail::TupleGenerator<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
-            g0, g1, g2, g3, g4, g5, g6, g7, g8, g9);
-}
-
-
-
+    
 }
 
 #endif
