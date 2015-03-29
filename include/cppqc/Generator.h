@@ -1277,7 +1277,7 @@ namespace detail {
                 shrinkOutput.push_back(std::move(copiedShrinkInput));
             }
 
-            // continue recursion (for right to left)
+            // continue recursion (from right to left)
             TupleGeneratorHelper_shrink<offset - 1, T...>::appendShrinks(
                 shrinkInput, shrinkOutput, generators);
         }
