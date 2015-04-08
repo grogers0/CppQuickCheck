@@ -31,6 +31,10 @@
 
 namespace cppqc {
 
+namespace detail {
+    struct null_type {};
+}
+
 class PropertyBase
 {
     public:
@@ -50,7 +54,7 @@ template<class T0, class T1 = detail::null_type, class T2 = detail::null_type,
 class Property : public PropertyBase
 {
     public:
-        typedef boost::tuple<T0, T1, T2, T3, T4> Input;
+        typedef std::tuple<T0, T1, T2, T3, T4> Input;
 
         Property(const Generator<T0> &g0 = Arbitrary<T0>(),
                 const Generator<T1> &g1 = Arbitrary<T1>(),
@@ -71,18 +75,18 @@ class Property : public PropertyBase
         }
         bool trivialInput(const Input &in) const
         {
-            return trivial(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in), boost::get<3>(in), boost::get<4>(in));
+            return trivial(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in), std::get<3>(in), std::get<4>(in));
         }
         std::string classifyInput(const Input &in) const
         {
-            return classify(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in), boost::get<3>(in), boost::get<4>(in));
+            return classify(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in), std::get<3>(in), std::get<4>(in));
         }
         bool checkInput(const Input &in) const
         {
-            return check(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in), boost::get<3>(in), boost::get<4>(in));
+            return check(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in), std::get<3>(in), std::get<4>(in));
         }
 
     private:
@@ -110,7 +114,7 @@ class Property<T0, detail::null_type, detail::null_type, detail::null_type,
       detail::null_type> : public PropertyBase
 {
     public:
-        typedef boost::tuple<T0> Input;
+        typedef std::tuple<T0> Input;
 
         Property(const Generator<T0> &g0 = Arbitrary<T0>()) :
             m_gen(tupleOf(g0))
@@ -127,15 +131,15 @@ class Property<T0, detail::null_type, detail::null_type, detail::null_type,
         }
         bool trivialInput(const Input &in) const
         {
-            return trivial(boost::get<0>(in));
+            return trivial(std::get<0>(in));
         }
         std::string classifyInput(const Input &in) const
         {
-            return classify(boost::get<0>(in));
+            return classify(std::get<0>(in));
         }
         bool checkInput(const Input &in) const
         {
-            return check(boost::get<0>(in));
+            return check(std::get<0>(in));
         }
 
     private:
@@ -160,7 +164,7 @@ class Property<T0, T1, detail::null_type, detail::null_type,
       detail::null_type> : public PropertyBase
 {
     public:
-        typedef boost::tuple<T0, T1> Input;
+        typedef std::tuple<T0, T1> Input;
 
         Property(const Generator<T0> &g0 = Arbitrary<T0>(),
                 const Generator<T1> &g1 = Arbitrary<T1>()) :
@@ -178,15 +182,15 @@ class Property<T0, T1, detail::null_type, detail::null_type,
         }
         bool trivialInput(const Input &in) const
         {
-            return trivial(boost::get<0>(in), boost::get<1>(in));
+            return trivial(std::get<0>(in), std::get<1>(in));
         }
         std::string classifyInput(const Input &in) const
         {
-            return classify(boost::get<0>(in), boost::get<1>(in));
+            return classify(std::get<0>(in), std::get<1>(in));
         }
         bool checkInput(const Input &in) const
         {
-            return check(boost::get<0>(in), boost::get<1>(in));
+            return check(std::get<0>(in), std::get<1>(in));
         }
 
     private:
@@ -211,7 +215,7 @@ class Property<T0, T1, T2, detail::null_type, detail::null_type> :
     public PropertyBase
 {
     public:
-        typedef boost::tuple<T0, T1, T2> Input;
+        typedef std::tuple<T0, T1, T2> Input;
 
         Property(const Generator<T0> &g0 = Arbitrary<T0>(),
                 const Generator<T1> &g1 = Arbitrary<T1>(),
@@ -230,18 +234,18 @@ class Property<T0, T1, T2, detail::null_type, detail::null_type> :
         }
         bool trivialInput(const Input &in) const
         {
-            return trivial(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in));
+            return trivial(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in));
         }
         std::string classifyInput(const Input &in) const
         {
-            return classify(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in));
+            return classify(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in));
         }
         bool checkInput(const Input &in) const
         {
-            return check(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in));
+            return check(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in));
         }
 
     private:
@@ -265,7 +269,7 @@ template<class T0, class T1, class T2, class T3>
 class Property<T0, T1, T2, T3, detail::null_type> : public PropertyBase
 {
     public:
-        typedef boost::tuple<T0, T1, T2, T3> Input;
+        typedef std::tuple<T0, T1, T2, T3> Input;
 
         Property(const Generator<T0> &g0 = Arbitrary<T0>(),
                 const Generator<T1> &g1 = Arbitrary<T1>(),
@@ -285,18 +289,18 @@ class Property<T0, T1, T2, T3, detail::null_type> : public PropertyBase
         }
         bool trivialInput(const Input &in) const
         {
-            return trivial(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in), boost::get<3>(in));
+            return trivial(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in), std::get<3>(in));
         }
         std::string classifyInput(const Input &in) const
         {
-            return classify(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in), boost::get<3>(in));
+            return classify(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in), std::get<3>(in));
         }
         bool checkInput(const Input &in) const
         {
-            return check(boost::get<0>(in), boost::get<1>(in),
-                    boost::get<2>(in), boost::get<3>(in));
+            return check(std::get<0>(in), std::get<1>(in),
+                    std::get<2>(in), std::get<3>(in));
         }
 
     private:
@@ -326,129 +330,129 @@ class Property<T0, T1, T2, T3, detail::null_type> : public PropertyBase
 // trivializeWith
 
     template<class T0>
-    std::ostream &printInput(std::ostream &out, const boost::tuple<T0> &in)
+    std::ostream &printInput(std::ostream &out, const std::tuple<T0> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1>
-    std::ostream &printInput(std::ostream &out, const boost::tuple<T0, T1> &in)
+    std::ostream &printInput(std::ostream &out, const std::tuple<T0, T1> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2> &in)
+            const std::tuple<T0, T1, T2> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3> &in)
+            const std::tuple<T0, T1, T2, T3> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3, class T4>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3, T4> &in)
+            const std::tuple<T0, T1, T2, T3, T4> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
-                   << "  4: " << prettyPrint(boost::get<4>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
+                   << "  4: " << prettyPrint(std::get<4>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3, class T4, class T5>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3, T4, T5> &in)
+            const std::tuple<T0, T1, T2, T3, T4, T5> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
-                   << "  4: " << prettyPrint(boost::get<4>(in)) << '\n'
-                   << "  5: " << prettyPrint(boost::get<5>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
+                   << "  4: " << prettyPrint(std::get<4>(in)) << '\n'
+                   << "  5: " << prettyPrint(std::get<5>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3, class T4,
         class T5, class T6>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3, T4, T5, T6> &in)
+            const std::tuple<T0, T1, T2, T3, T4, T5, T6> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
-                   << "  4: " << prettyPrint(boost::get<4>(in)) << '\n'
-                   << "  5: " << prettyPrint(boost::get<5>(in)) << '\n'
-                   << "  6: " << prettyPrint(boost::get<6>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
+                   << "  4: " << prettyPrint(std::get<4>(in)) << '\n'
+                   << "  5: " << prettyPrint(std::get<5>(in)) << '\n'
+                   << "  6: " << prettyPrint(std::get<6>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3, class T4,
         class T5, class T6, class T7>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7> &in)
+            const std::tuple<T0, T1, T2, T3, T4, T5, T6, T7> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
-                   << "  4: " << prettyPrint(boost::get<4>(in)) << '\n'
-                   << "  5: " << prettyPrint(boost::get<5>(in)) << '\n'
-                   << "  6: " << prettyPrint(boost::get<6>(in)) << '\n'
-                   << "  7: " << prettyPrint(boost::get<7>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
+                   << "  4: " << prettyPrint(std::get<4>(in)) << '\n'
+                   << "  5: " << prettyPrint(std::get<5>(in)) << '\n'
+                   << "  6: " << prettyPrint(std::get<6>(in)) << '\n'
+                   << "  7: " << prettyPrint(std::get<7>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3, class T4,
         class T5, class T6, class T7, class T8>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8> &in)
+            const std::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
-                   << "  4: " << prettyPrint(boost::get<4>(in)) << '\n'
-                   << "  5: " << prettyPrint(boost::get<5>(in)) << '\n'
-                   << "  6: " << prettyPrint(boost::get<6>(in)) << '\n'
-                   << "  7: " << prettyPrint(boost::get<7>(in)) << '\n'
-                   << "  8: " << prettyPrint(boost::get<8>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
+                   << "  4: " << prettyPrint(std::get<4>(in)) << '\n'
+                   << "  5: " << prettyPrint(std::get<5>(in)) << '\n'
+                   << "  6: " << prettyPrint(std::get<6>(in)) << '\n'
+                   << "  7: " << prettyPrint(std::get<7>(in)) << '\n'
+                   << "  8: " << prettyPrint(std::get<8>(in)) << '\n'
                    << std::flush;
     }
 
     template<class T0, class T1, class T2, class T3, class T4,
         class T5, class T6, class T7, class T8, class T9>
     std::ostream &printInput(std::ostream &out,
-            const boost::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> &in)
+            const std::tuple<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9> &in)
     {
-        return out << "  0: " << prettyPrint(boost::get<0>(in)) << '\n'
-                   << "  1: " << prettyPrint(boost::get<1>(in)) << '\n'
-                   << "  2: " << prettyPrint(boost::get<2>(in)) << '\n'
-                   << "  3: " << prettyPrint(boost::get<3>(in)) << '\n'
-                   << "  4: " << prettyPrint(boost::get<4>(in)) << '\n'
-                   << "  5: " << prettyPrint(boost::get<5>(in)) << '\n'
-                   << "  6: " << prettyPrint(boost::get<6>(in)) << '\n'
-                   << "  7: " << prettyPrint(boost::get<7>(in)) << '\n'
-                   << "  8: " << prettyPrint(boost::get<8>(in)) << '\n'
-                   << "  9: " << prettyPrint(boost::get<9>(in)) << '\n'
+        return out << "  0: " << prettyPrint(std::get<0>(in)) << '\n'
+                   << "  1: " << prettyPrint(std::get<1>(in)) << '\n'
+                   << "  2: " << prettyPrint(std::get<2>(in)) << '\n'
+                   << "  3: " << prettyPrint(std::get<3>(in)) << '\n'
+                   << "  4: " << prettyPrint(std::get<4>(in)) << '\n'
+                   << "  5: " << prettyPrint(std::get<5>(in)) << '\n'
+                   << "  6: " << prettyPrint(std::get<6>(in)) << '\n'
+                   << "  7: " << prettyPrint(std::get<7>(in)) << '\n'
+                   << "  8: " << prettyPrint(std::get<8>(in)) << '\n'
+                   << "  9: " << prettyPrint(std::get<9>(in)) << '\n'
                    << std::flush;
     }
 

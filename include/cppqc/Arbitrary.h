@@ -298,7 +298,7 @@ std::vector<String> shrinkString(const String &x)
 {
     std::vector<String> ret;
     ret.reserve(x.size());
-    for (typename String::const_iterator it = x.begin(); it != x.end(); ++it) {
+    for (auto it = x.begin(); it != x.end(); ++it) {
         ret.push_back(String());
         ret.back().reserve(x.size() - 1);
         ret.back().insert(ret.back().end(), x.begin(), it);
@@ -338,12 +338,10 @@ std::vector<PairType> shrinkPair(const PairType &x)
     std::vector<SecondType> shrinks2 = Arbitrary<SecondType>::shrink(x.second);
     std::vector<PairType> ret;
     ret.reserve(shrinks1.size() + shrinks2.size());
-    for (typename std::vector<FirstType>::const_iterator it = shrinks1.begin();
-            it != shrinks1.end(); ++it) {
+    for (auto it = shrinks1.begin(); it != shrinks1.end(); ++it) {
         ret.push_back(PairType(*it, x.second));
     }
-    for (typename std::vector<SecondType>::const_iterator it = shrinks2.begin();
-            it != shrinks2.end(); ++it) {
+    for (auto it = shrinks2.begin(); it != shrinks2.end(); ++it) {
         ret.push_back(PairType(x.first, *it));
     }
     return ret;

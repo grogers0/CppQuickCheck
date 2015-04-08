@@ -26,7 +26,6 @@
 #include "cppqc.h"
 
 #include <algorithm>
-#include <boost/static_assert.hpp>
 #include <sstream>
 
 struct PropTestReverse : cppqc::Property<std::vector<int>>
