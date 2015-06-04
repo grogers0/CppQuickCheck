@@ -51,7 +51,7 @@ Integral arbitrarySizedIntegral(RngEngine &rng, std::size_t size)
 }
 
 template<class Integral>
-Integral arbitraryBoundedIntegral(RngEngine &rng, std::size_t size)
+Integral arbitraryBoundedIntegral(RngEngine &rng, std::size_t /*size*/)
 {
     boost::uniform_int<Integral> dist(std::numeric_limits<Integral>::min(),
             std::numeric_limits<Integral>::max());
@@ -81,7 +81,7 @@ Real arbitrarySizedReal(RngEngine &rng, std::size_t size)
 // default shrinkers
 
 template<class T>
-std::vector<T> shrinkNothing(const T &x)
+std::vector<T> shrinkNothing(const T &)
 {
     return std::vector<T>();
 }

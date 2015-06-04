@@ -393,7 +393,7 @@ namespace detail {
                 return m_gen.unGen(rng, size);
             }
 
-            std::vector<T> shrink(const T &x)
+            std::vector<T> shrink(const T &)
             {
                 return std::vector<T>();
             }
@@ -416,7 +416,7 @@ namespace detail {
                 return m_gen.unGen(rng, size);
             }
 
-            std::vector<T> shrink(const T &x)
+            std::vector<T> shrink(const T &)
             {
                 return std::vector<T>();
             }
@@ -769,14 +769,14 @@ namespace detail {
                 return *this;
             }
 
-            T unGen(RngEngine &rng, std::size_t size)
+            T unGen(RngEngine &rng, std::size_t /*size*/)
             {
                 boost::uniform_int<std::size_t> dist(0, m_elems.size() - 1);
                 m_last_index = dist(rng);
                 return m_elems[m_last_index];
             }
 
-            std::vector<T> shrink(const T &x)
+            std::vector<T> shrink(const T &)
             {
                 std::vector<T> ret;
                 ret.reserve(m_last_index);
@@ -825,7 +825,7 @@ namespace detail {
                 }
             }
 
-            std::vector<T> shrink(const T &x)
+            std::vector<T> shrink(const T &)
             {
                 return std::vector<T>();
             }
@@ -1208,7 +1208,7 @@ namespace detail {
                 return ret;
             }
 
-            std::vector<std::vector<T> > shrink(const std::vector<T> &x) const
+            std::vector<std::vector<T> > shrink(const std::vector<T> &) const
             {
                 return std::vector<std::vector<T> >();
             }
