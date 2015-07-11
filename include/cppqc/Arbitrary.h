@@ -90,8 +90,15 @@ template<class Integral>
 std::vector<Integral> shrinkIntegral(Integral x)
 {
     std::vector<Integral> ret;
-    if (x < 0 && -x > x)
-        ret.push_back(-x);
+    if (std::numeric_limits<Integral>::is_signed && x < 0) {
+        if (x == std::numeric_limits<Integral>::min()) {
+            ret.push_back(std::numeric_limits<Integral>::max());
+        } else {
+            assert(-x > 0);
+            ret.push_back(-x);
+        }
+    }
+
     for (Integral n = x; n != 0; n /= 2)
         ret.push_back(x - n);
     return ret;
@@ -106,7 +113,9 @@ std::vector<Real> shrinkReal(Real x)
     if (x < 0)
         ret.push_back(-x);
     ret.push_back(Real(0));
-    ret.push_back(x / Real(2));
+    if (abs(x) >= 2) {
+        ret.push_back(x / Real(2));
+    }
     return ret;
 }
 

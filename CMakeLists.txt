@@ -14,3 +14,8 @@ add_library(cppqc SHARED src/Arbitrary.cpp)
 install(DIRECTORY "include/" DESTINATION "include"
     PATTERN ".*" EXCLUDE)
 install(TARGETS cppqc DESTINATION "lib")
+
+# "catch" based unit tests
+enable_testing()
+add_executable(all-catch-tests test/catch-main.cpp test/shrink-explosion-protection.cpp)
+add_test(all-catch-tests all-catch-tests)
