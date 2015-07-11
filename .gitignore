@@ -10,3 +10,5 @@ testReverse
 testReverseArray
 testSort
 libcppqc.so
+
+all-catch-tests
