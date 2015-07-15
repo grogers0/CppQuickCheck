@@ -113,8 +113,15 @@ std::vector<Real> shrinkReal(Real x)
     if (x < 0)
         ret.push_back(-x);
     ret.push_back(Real(0));
-    if (abs(x) >= 2) {
-        ret.push_back(x / Real(2));
+
+    if (std::isnan(x) && std::abs(x) >= 2) {
+        if (std::abs(x) < 1e100) {
+            ret.push_back(x / Real(2));
+        } else {
+            // special case: reduce faster if the numbers are huge
+            // (Note: Maybe there is a better heuristic. Looks quite crude.)
+            ret.push_back(x / Real(1e20));
+        }
     }
     return ret;
 }

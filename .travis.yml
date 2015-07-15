@@ -1,0 +1,30 @@
+language: c++
+compiler:
+  - gcc
+  - clang
+script: cmake . && make && ./all-catch-tests
+
+# source: https://github.com/OpenLightingProject/ola/blob/master/.travis.yml
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo add-apt-repository ppa:h-rayflood/gcc-upper -y
+  - sudo add-apt-repository "deb http://llvm.org/apt/precise/ llvm-toolchain-precise main" -y
+  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+  - sudo add-apt-repository ppa:ubuntu-cloud-archive/icehouse-staging -y
+  - sudo apt-get update -qq
+
+  - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.9; fi
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+#Remove the old g++/gcc to ensure we're using the latest ones
+  - if [ "$CXX" = "g++-4.9" ]; then sudo rm /usr/bin/g++; sudo rm /usr/bin/gcc; fi
+
+  - if [ "$CXX" = "clang++" ]; then sudo apt-get install -qq clang-3.7; fi
+  - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+#Remove the old clang to ensure we're using the latest ones
+  - if [ "$CXX" = "clang++-3.7" ]; then sudo rm /usr/local/clang-3.4/bin/clang; sudo rm /usr/local/clang-3.4/bin/clang++; fi
+
+#Report the compiler version
+  - $CXX --version
+
+  - sudo apt-get update -qq
+  - sudo apt-get install libboost-thread-dev libboost-system-dev
