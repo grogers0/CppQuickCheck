@@ -763,6 +763,13 @@ namespace detail {
     class ElementsGenerator
     {
         public:
+            ElementsGenerator &operator()(const std::initializer_list<T> x)
+            {
+                for (auto &i: x)
+                    m_elems.push_back(i);
+                return *this;
+            }
+
             ElementsGenerator &operator()(const T &x)
             {
                 m_elems.push_back(x);
@@ -792,6 +799,13 @@ namespace detail {
 }
 
 /// Generates one of the given values.
+template<class T>
+detail::ElementsGenerator<T> elements(const std::initializer_list<T> x)
+{
+    detail::ElementsGenerator<T> ret;
+    return ret(x);
+}
+
 template<class T>
 detail::ElementsGenerator<T> elements(const T &x)
 {
