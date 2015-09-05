@@ -1,14 +1,18 @@
+*~
+
 CMakeCache.txt
 CMakeFiles/
 Makefile
 cmake_install.cmake
 install_manifest.txt
 
-sampleOutput
-sampleShrinkOutput
-testReverse
-testReverseArray
-testSort
+examples/sampleOutput
+examples/sampleShrinkOutput
+examples/testReverse
+examples/testReverseArray
+examples/testSort
+examples/testChooseGenerator
+examples/exampleElementsGen
 libcppqc.so
 
 all-catch-tests
