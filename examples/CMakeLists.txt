@@ -13,6 +13,9 @@ target_link_libraries(testReverseArray cppqc)
 add_executable(testSort src/TestSort.cpp)
 target_link_libraries(testSort cppqc)
 
+add_executable(testChooseGenerator src/TestChooseGenerator.cpp)
+target_link_libraries(testChooseGenerator cppqc)
+
 add_executable(exampleElementsGen src/exampleElementsGen.cpp)
 target_link_libraries(exampleElementsGen cppqc)
 
