@@ -24,6 +24,7 @@
  */
 
 #include "Test.h"
+#include "Arbitrary.h"
 
 namespace cppqc
 {
@@ -83,28 +84,32 @@ class CompactCheck : public Property<T ...>
     , m_classifyFnc(classifyFunction)
     {}
 
-      bool check(const T& ... v) const override
-      {
-          return CheckFunctionT::apply(m_checkFnc, true, v ...);
-      }
+    bool check(const T& ... v) const override
+    {
+        return CheckFunctionT::apply(m_checkFnc, true, v ...);
+    }
 
-      bool trivial(const T& ... v) const override
-      {
-        return TrivialFunctionT::apply(m_trivialFnc, false, v ...);
-      }
+    bool trivial(const T& ... v) const override
+    {
+      return TrivialFunctionT::apply(m_trivialFnc, false, v ...);
+    }
 
-      std::string classify(const T& ... v) const override
-      {
-        return ClassifyFunctionT::apply(m_classifyFnc, std::string(), v ...);
-      }
+    std::string classify(const T& ... v) const override
+    {
+      return ClassifyFunctionT::apply(m_classifyFnc, std::string(), v ...);
+    }
 
-      std::string name() const
-      {
-          return m_name.empty() ? "no-name" : m_name;
-      }
+    std::string name() const
+    {
+        return m_name.empty() ? "no-name" : m_name;
+    }
 
 public:
     CompactCheck()
+    {}
+
+    CompactCheck(const Generator<T>& ... g)
+    : Property<T ...>(g ...)
     {}
 
     template<typename _CheckFunction>
@@ -145,6 +150,11 @@ CompactCheck<void, void, void, T ...> gen()
     return CompactCheck<void, void, void, T ...>();
 }
 
+template<typename ... T>
+CompactCheck<void, void, void, T ...> gen(const Generator<T>& ... g)
+{
+    return CompactCheck<void, void, void, T ...>(g ...);
+}
 
 
 }
