@@ -52,6 +52,8 @@ void selection_sort(InputIterator b, InputIterator e, bool make_mistakes = false
 
 int main()
 {
+    std::cout << "* uut::selection_sort" << std::endl;
+
     cppqc::gen<std::vector<int>>()
         .property("Sorting should be sorted",
             [](const std::vector<int> &v)
@@ -69,4 +71,25 @@ int main()
                 return v.empty() || v.size() == 1;
             })
         .testWithOutput();
+
+    std::cout << "* std::sort" << std::endl;
+
+    cppqc::gen<std::vector<int>>()
+        .property("Sorting should be sorted",
+            [](const std::vector<int> &v)
+            {
+                std::vector<int> v_copy(v);
+                std::sort(v_copy.begin(), v_copy.end());
+                return std::is_sorted(std::begin(v_copy), std::end(v_copy));
+            })
+        .classify([](const std::vector<int> &v)
+            {
+                return std::to_string(v.size());
+            })
+        .trivial([](const std::vector<int> &v)
+            {
+                return v.empty() || v.size() == 1;
+            })
+        .testWithOutput();
+
 }
