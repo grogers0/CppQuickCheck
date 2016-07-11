@@ -33,13 +33,20 @@ template<typename Function>
 struct CompactCheckFunction
 {
     using type = Function;
-    using FunctionT = Function;
+    Function m_Function;
+
+    CompactCheckFunction(Function&& fnc)
+    : m_Function(std::move(fnc))
+    {}
+
+    CompactCheckFunction(CompactCheckFunction&&) = default;
+
     static const bool valid = true;
 
     template<typename ReturnType, typename ... T>
-    static ReturnType apply(const Function& fnc, ReturnType, const T& ... v)
+    ReturnType apply(ReturnType, const T& ... v) const
     {
-        return fnc(v ...);
+        return m_Function(v ...);
     }
 };
 
@@ -47,11 +54,13 @@ template<>
 struct CompactCheckFunction<void>
 {
     using type = void;
-    using FunctionT = void*;
     static const bool valid = false;
 
-    template<typename Function, typename ReturnType, typename ... T>
-    static ReturnType apply(const Function& fnc, ReturnType r, const T& ... v)
+    CompactCheckFunction() = default;
+    CompactCheckFunction(CompactCheckFunction&&) = default;
+
+    template<typename ReturnType, typename ... T>
+    ReturnType apply(ReturnType r, const T& ... v) const
     {
         return r;
     }
@@ -66,37 +75,37 @@ class CompactCheck : public Property<T ...>
     friend class CompactCheck;
 
     using CheckFunctionT = CompactCheckFunction<CheckFunction>;
-    typename CheckFunctionT::FunctionT m_checkFnc;
+    CheckFunctionT m_checkFnc;
 
     using TrivialFunctionT = CompactCheckFunction<TrivialFunction>;
-    typename TrivialFunctionT::FunctionT m_trivialFnc;
+    TrivialFunctionT m_trivialFnc;
 
     using ClassifyFunctionT = CompactCheckFunction<ClassifyFunction>;
-    typename ClassifyFunctionT::FunctionT m_classifyFnc;
+    ClassifyFunctionT m_classifyFnc;
 
     CompactCheck( std::string name,
-                  typename CheckFunctionT::FunctionT&& checkFunction,
-                  typename TrivialFunctionT::FunctionT&& trivialFunctions,
-                  typename ClassifyFunctionT::FunctionT&& classifyFunction)
+                  CheckFunctionT&& checkFunction,
+                  TrivialFunctionT&& trivialFunctions,
+                  ClassifyFunctionT&& classifyFunction)
     : m_name(name)
-    , m_checkFnc(checkFunction)
-    , m_trivialFnc(trivialFunctions)
-    , m_classifyFnc(classifyFunction)
+    , m_checkFnc(std::move(checkFunction))
+    , m_trivialFnc(std::move(trivialFunctions))
+    , m_classifyFnc(std::move(classifyFunction))
     {}
 
     bool check(const T& ... v) const override
     {
-        return CheckFunctionT::apply(m_checkFnc, true, v ...);
+      return m_checkFnc.apply(true, v ...);
     }
 
     bool trivial(const T& ... v) const override
     {
-      return TrivialFunctionT::apply(m_trivialFnc, false, v ...);
+    return m_trivialFnc.apply(false, v ...);
     }
 
     std::string classify(const T& ... v) const override
     {
-      return ClassifyFunctionT::apply(m_classifyFnc, std::string(), v ...);
+    return m_classifyFnc.apply(std::string(), v ...);
     }
 
     std::string name() const
@@ -113,24 +122,33 @@ public:
     {}
 
     template<typename _CheckFunction>
-    CompactCheck<_CheckFunction, typename TrivialFunctionT::type, typename ClassifyFunctionT::type, T ...> property(const std::string& name, _CheckFunction&& checkFnc)
+    CompactCheck<_CheckFunction, TrivialFunction, ClassifyFunction, T ...> property(const std::string& name, _CheckFunction&& checkFnc)
     {
         static_assert(CheckFunctionT::valid == false, "Check function is already set");
-        return CompactCheck<_CheckFunction, typename TrivialFunctionT::type, typename ClassifyFunctionT::type, T ...>(name, std::move(checkFnc), std::move(m_trivialFnc), std::move(m_classifyFnc));
+        return CompactCheck<_CheckFunction, TrivialFunction, ClassifyFunction, T ...>( name,
+                                                                                       std::move(checkFnc),
+                                                                                       std::move(m_trivialFnc),
+                                                                                       std::move(m_classifyFnc));
     }
 
     template<typename _TrivialFunction>
-    CompactCheck<typename CheckFunctionT::type, _TrivialFunction, typename ClassifyFunctionT::type, T ...> trivial(_TrivialFunction&& trivialFnc)
+    CompactCheck<CheckFunction, _TrivialFunction, ClassifyFunction, T ...> trivial(_TrivialFunction&& trivialFnc)
     {
         static_assert(TrivialFunctionT::valid == false, "Trivial function is already set");
-        return CompactCheck<typename CheckFunctionT::type, _TrivialFunction, typename ClassifyFunctionT::type, T ...>(std::move(m_name), std::move(m_checkFnc), std::move(trivialFnc), std::move(m_classifyFnc));
+        return CompactCheck<CheckFunction, _TrivialFunction, ClassifyFunction, T ...>( std::move(m_name),
+                                                                                       std::move(m_checkFnc),
+                                                                                       std::move(trivialFnc),
+                                                                                       std::move(m_classifyFnc));
     }
 
     template<typename _ClassifyFunction>
-    CompactCheck<typename CheckFunctionT::type, typename TrivialFunctionT::type, _ClassifyFunction, T ...> classify(_ClassifyFunction&& classifyFnc)
+    CompactCheck<CheckFunction, TrivialFunction, _ClassifyFunction, T ...> classify(_ClassifyFunction&& classifyFnc)
     {
         static_assert(ClassifyFunctionT::valid == false, "Classsify function is already set");
-        return CompactCheck<typename CheckFunctionT::type, typename TrivialFunctionT::type, _ClassifyFunction, T ...>(std::move(m_name), std::move(m_checkFnc), std::move(m_trivialFnc), std::move(classifyFnc));
+        return CompactCheck<CheckFunction, TrivialFunction, _ClassifyFunction, T ...>( std::move(m_name),
+                                                                                       std::move(m_checkFnc),
+                                                                                       std::move(m_trivialFnc),
+                                                                                       std::move(classifyFnc));
     }
 
     Result test( std::size_t maxSuccess = 100, std::size_t maxDiscarded = 0, std::size_t maxSize = 0)
