@@ -13,6 +13,9 @@ target_link_libraries(testReverseArray cppqc)
 add_executable(testSort src/TestSort.cpp)
 target_link_libraries(testSort cppqc)
 
+add_executable(testSortCompact src/TestSortCompact.cpp)
+target_link_libraries(testSortCompact cppqc)
+
 add_executable(testChooseGenerator src/TestChooseGenerator.cpp)
 target_link_libraries(testChooseGenerator cppqc)
 
@@ -22,5 +25,3 @@ target_link_libraries(exampleElementsGen cppqc)
 # requires c++1y compile flag
 #add_executable(testBoostTupleSupport src/BoostTupleSupport.cpp)
 #target_link_libraries(testBoostTupleSupport cppqc)
-
-
