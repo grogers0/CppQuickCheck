@@ -87,7 +87,7 @@ class CompactCheck : public Property<T ...>
                   CheckFunctionT&& checkFunction,
                   TrivialFunctionT&& trivialFunctions,
                   ClassifyFunctionT&& classifyFunction)
-    : m_name(name)
+    : m_name(std::move(name))
     , m_checkFnc(std::move(checkFunction))
     , m_trivialFnc(std::move(trivialFunctions))
     , m_classifyFnc(std::move(classifyFunction))
@@ -95,17 +95,17 @@ class CompactCheck : public Property<T ...>
 
     bool check(const T& ... v) const override
     {
-      return m_checkFnc.apply(true, v ...);
+        return m_checkFnc.apply(true, v ...);
     }
 
     bool trivial(const T& ... v) const override
     {
-    return m_trivialFnc.apply(false, v ...);
+        return m_trivialFnc.apply(false, v ...);
     }
 
     std::string classify(const T& ... v) const override
     {
-    return m_classifyFnc.apply(std::string(), v ...);
+        return m_classifyFnc.apply(std::string(), v ...);
     }
 
     std::string name() const
