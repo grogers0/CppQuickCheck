@@ -33,6 +33,7 @@
 #include <iostream>
 #include <iomanip>
 #include <ostream>
+#include <limits>
 
 namespace cppqc {
 
@@ -127,11 +128,52 @@ continueShrinking:
     }
 }
 
+using SeedType = uint32_t;
+
+// By default, a random seed will be used.
+// To overwrite the default behaviour, set the environment variable
+// "CPPQUICKCHECK_SEED".
+constexpr SeedType USE_DEFAULT_SEED = std::numeric_limits<uint32_t>::max();
+
+// If this environment variable is set, its value will overwrite the
+// default seed. In other words, no random seed will be generated but
+// if a seed has been explicitly set, it will will be used.
+constexpr const char* CPPQUICKCHECK_SEED_ENV = "CPPQUICKCHECK_SEED";
+
+namespace detail {
+    inline SeedType resolveSeed(SeedType originalSeed = USE_DEFAULT_SEED)
+    {
+        if (originalSeed == USE_DEFAULT_SEED) {
+            const char* seed_from_env = std::getenv(CPPQUICKCHECK_SEED_ENV);
+            if (seed_from_env != nullptr) {
+                try {
+                    return static_cast<uint32_t>(std::stoi(seed_from_env));
+                } catch (std::invalid_argument&) {
+                    std::ostringstream err;
+                    err << "Failed to parse seed in environment variable "
+                        << CPPQUICKCHECK_SEED_ENV
+                        << ": Got <" << seed_from_env
+                        << ">, but expected an integer between "
+                        << "0 and " << (USE_DEFAULT_SEED - 1)
+                        << ". To use a random seed instead, "
+                           "unset the environment variable.";
+                    throw std::invalid_argument{err.str()};
+                }
+            } else {
+                return static_cast<SeedType>(time(0));
+            }
+        } else {
+            return originalSeed;
+        }
+    }
+}
+
 template<class T0, class T1, class T2, class T3, class T4>
 Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
         std::ostream &out = std::cout,
         std::size_t maxSuccess = 100,
-        std::size_t maxDiscarded = 0, std::size_t maxSize = 0)
+        std::size_t maxDiscarded = 0, std::size_t maxSize = 0,
+        SeedType seed = USE_DEFAULT_SEED)
 {
     typedef typename Property<T0, T1, T2, T3, T4>::Input Input;
 
@@ -144,7 +186,9 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
 
     std::map<std::string, std::size_t> labelsCollected;
     std::size_t numSuccess = 0, numDiscarded = 0, numTrivial = 0;
-    RngEngine rng(time(nullptr));
+
+    seed = detail::resolveSeed(seed);
+    RngEngine rng{seed};
     while (numSuccess < maxSuccess) {
         try {
             std::size_t size = (numSuccess * maxSize + numDiscarded) / maxSuccess;

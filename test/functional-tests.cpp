@@ -54,6 +54,18 @@ struct MinimalFailingProperty : cppqc::Property<bool>
     }
 };
 
+struct NontriviallyFailingProperty : cppqc::Property<std::vector<int>>
+{
+    bool check(const std::vector<int> &v) const override
+    {
+        if (v.size() >= 1 && (v[0] % 99) == 1) {
+            return false;
+        }
+
+        return true;
+    }
+};
+
 } // end FunctionalTestsFixtures
 
 TEST_CASE("minimal passing example",
@@ -72,4 +84,23 @@ TEST_CASE("minimal failing example",
         quickCheckOutput(FunctionalTestsFixtures::MinimalFailingProperty{});
 
     REQUIRE(result.result == QC_FAILURE);
+}
+
+TEST_CASE("tests with fixed seeds must be repeatible",
+          "[functional][seed]")
+{
+    for (int i = 0; i < 100; i++) {
+        std::ostringstream output1;
+        const Result run1 =
+            quickCheckOutput(FunctionalTestsFixtures::NontriviallyFailingProperty{},
+                             output1, 100, 0, 0, static_cast<SeedType>(i));
+
+        std::ostringstream output2;
+        const Result run2 =
+            quickCheckOutput(FunctionalTestsFixtures::NontriviallyFailingProperty{},
+                             output2, 100, 0, 0, static_cast<SeedType>(i));
+
+        REQUIRE(run1.result == run2.result);
+        REQUIRE(output1.str() == output2.str());
+    }
 }
