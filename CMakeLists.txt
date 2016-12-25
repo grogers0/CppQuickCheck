@@ -17,7 +17,12 @@ install(TARGETS cppqc DESTINATION "lib")
 
 # "catch" based unit tests
 enable_testing()
-add_executable(all-catch-tests test/catch-main.cpp test/shrink-explosion-protection.cpp)
+add_executable(
+  all-catch-tests
+  test/catch-main.cpp
+  test/shrink-explosion-protection.cpp
+  test/functional-tests.cpp)
+target_link_libraries(all-catch-tests cppqc)
 add_test(all-catch-tests all-catch-tests)
 
 # workaround to force cmake to build test executable before running the test
