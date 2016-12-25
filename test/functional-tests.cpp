@@ -23,60 +23,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cppqc/Arbitrary.h"
+#include "cppqc.h"
 #include "catch.hpp"
-#include "cppqc/CompactCheck.h"
 
 using namespace cppqc;
 
-TEST_CASE("minimal passing example in compact check representation",
+namespace FunctionalTestsFixtures {
+
+struct MinimalPassingProperty : cppqc::Property<bool>
+{
+    bool check(const bool &v) const override
+    {
+        return true;
+    }
+    std::string name() const override
+    {
+        return "Dummy check (will always pass)";
+    }
+};
+
+struct MinimalFailingProperty : cppqc::Property<bool>
+{
+    bool check(const bool &v) const override
+    {
+        return false; // fails intentionally
+    }
+    std::string name() const override
+    {
+        return "Dummy check (will always fail)";
+    }
+};
+
+} // end FunctionalTestsFixtures
+
+TEST_CASE("minimal passing example",
           "[functional]")
 {
-    const Result result = cppqc::gen<bool>()
-        .property("Dummy check (always passing)",
-            [](const bool &v)
-            {
-                return true;
-            })
-        .testWithOutput();
+    const Result result =
+        quickCheckOutput(FunctionalTestsFixtures::MinimalPassingProperty{});
 
     REQUIRE(result.result == QC_SUCCESS);
 }
 
-TEST_CASE("minimal failing example in compact check representation",
+TEST_CASE("minimal failing example",
           "[functional]")
 {
-    const Result result = cppqc::gen<bool>()
-        .property("Dummy check (always failing)",
-            [](const bool &v)
-            {
-                return false; // Intended to fail
-            })
-        .testWithOutput();
+    const Result result =
+        quickCheckOutput(FunctionalTestsFixtures::MinimalFailingProperty{});
 
     REQUIRE(result.result == QC_FAILURE);
-}
-
-TEST_CASE("non-trivial example with std::sort should pass all tests",
-          "[functional]")
-{
-    const Result result = cppqc::gen<std::vector<int>>()
-        .property("Should be sorted after calling std::sort",
-            [](const std::vector<int> &v)
-            {
-                std::vector<int> v_copy(v);
-                std::sort(std::begin(v_copy), std::end(v_copy));
-                return std::is_sorted(std::begin(v_copy), std::end(v_copy));
-            })
-        .classify([](const std::vector<int> &v)
-            {
-                return std::to_string(v.size());
-            })
-        .trivial([](const std::vector<int> &v)
-            {
-                return v.empty() || v.size() == 1;
-            })
-        .testWithOutput();
-
-    REQUIRE(result.result == QC_SUCCESS);
 }

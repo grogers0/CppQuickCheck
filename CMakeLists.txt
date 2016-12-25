@@ -21,6 +21,7 @@ add_executable(
   all-catch-tests
   test/catch-main.cpp
   test/shrink-explosion-protection.cpp
+  test/compact-check-tests.cpp
   test/functional-tests.cpp)
 target_link_libraries(all-catch-tests cppqc)
 add_test(all-catch-tests all-catch-tests)
