@@ -90,15 +90,17 @@ TEST_CASE("tests with fixed seeds must be repeatible",
           "[functional][seed]")
 {
     for (int i = 0; i < 100; i++) {
+        const auto seed = static_cast<SeedType>(i);
+
         std::ostringstream output1;
         const Result run1 =
             quickCheckOutput(FunctionalTestsFixtures::NontriviallyFailingProperty{},
-                             output1, 100, 0, 0, static_cast<SeedType>(i));
+                             output1, 100, 0, 0, DISABLE_SHRINK_TIMEOUT, seed);
 
         std::ostringstream output2;
         const Result run2 =
             quickCheckOutput(FunctionalTestsFixtures::NontriviallyFailingProperty{},
-                             output2, 100, 0, 0, static_cast<SeedType>(i));
+                             output2, 100, 0, 0, DISABLE_SHRINK_TIMEOUT, seed);
 
         REQUIRE(run1.result == run2.result);
         REQUIRE(output1.str() == output2.str());
