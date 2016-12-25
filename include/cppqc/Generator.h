@@ -28,7 +28,6 @@
 
 #include <boost/function.hpp>
 #include <boost/random/uniform_int.hpp>
-#include <boost/random/mersenne_twister.hpp>
 #include <tuple>
 #include <utility>
 #include <cstddef>
@@ -37,10 +36,11 @@
 #include <map>
 #include <algorithm>
 #include <stdexcept>
+#include <random>
 
 namespace cppqc {
 
-typedef boost::mt19937 RngEngine;
+typedef std::mt19937 RngEngine;
 
 template<class T> struct Arbitrary;
 
