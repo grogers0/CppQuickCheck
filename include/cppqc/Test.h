@@ -34,6 +34,7 @@
 #include <iomanip>
 #include <ostream>
 #include <limits>
+#include <chrono>
 
 namespace cppqc {
 
@@ -103,23 +104,32 @@ namespace detail {
     template<class T0, class T1, class T2, class T3, class T4>
     std::pair<std::size_t, typename Property<T0, T1, T2, T3, T4>::Input>
     doShrink(const Property<T0, T1, T2, T3, T4> &prop,
-            const typename Property<T0, T1, T2, T3, T4>::Input &in)
+             const typename Property<T0, T1, T2, T3, T4>::Input &in,
+             std::chrono::duration<double> timeout)
     {
         typedef typename Property<T0, T1, T2, T3, T4>::Input Input;
 
         std::size_t numShrinks = 0;
         Input shrunk = in;
+        const auto start = std::chrono::steady_clock::now();
 
         try {
 continueShrinking:
             std::vector<Input> shrinks =
                 prop.shrinkInput(shrunk);
-            for (typename std::vector<Input>::const_iterator it =
-                    shrinks.begin(); it != shrinks.end(); ++it) {
-                if (!prop.checkInput(*it)) {
-                    shrunk = *it;
+            for (Input input : shrinks) {
+                if (!prop.checkInput(input)) {
+                    shrunk = std::move(input);
                     numShrinks++;
                     goto continueShrinking;
+                }
+
+                // No progress was made. Check the time limit:
+                const std::chrono::duration<double> elapsed =
+                    std::chrono::steady_clock::now() - start;
+                if (elapsed >= timeout) {
+                    std::cout << "Shrinking timed out...\n";
+                    break;
                 }
             }
         } catch (...) {
@@ -168,11 +178,15 @@ namespace detail {
     }
 }
 
+constexpr auto DEFAULT_SHRINK_TIMEOUT = std::chrono::seconds(30);
+constexpr auto DISABLE_SHRINK_TIMEOUT = std::chrono::seconds::max();
+
 template<class T0, class T1, class T2, class T3, class T4>
 Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
         std::ostream &out = std::cout,
         std::size_t maxSuccess = 100,
         std::size_t maxDiscarded = 0, std::size_t maxSize = 0,
+        std::chrono::duration<double> shrinkTimeout = DEFAULT_SHRINK_TIMEOUT,
         SeedType seed = USE_DEFAULT_SEED)
 {
     typedef typename Property<T0, T1, T2, T3, T4>::Input Input;
@@ -219,7 +233,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
                 std::size_t numShrinks = 0;
                 try {
                     std::pair<std::size_t, Input> shrinkRes =
-                        detail::doShrink(prop, in);
+                        detail::doShrink(prop, in, shrinkTimeout);
                     numShrinks = shrinkRes.first;
                     if (numShrinks > 0) {
                         out << " and " << numShrinks
