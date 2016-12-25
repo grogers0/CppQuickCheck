@@ -53,6 +53,12 @@ $ cmake .
 $ make check
 ```
 
+To get a more detailed output, rerun it with
+
+```
+$ ./all-catch-tests
+```
+
 ## LICENSE
 
 CppQuickCheck is distributed under a BSD license (see LICENSE).
