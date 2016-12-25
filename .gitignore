@@ -12,7 +12,8 @@ examples/testReverse
 examples/testReverseArray
 examples/testSort
 examples/testChooseGenerator
+examples/testSortCompact
 examples/exampleElementsGen
-libcppqc.so
+examples/testSlowShrinking
 
 all-catch-tests
