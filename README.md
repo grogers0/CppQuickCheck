@@ -44,6 +44,15 @@ For these reasons, CppQuickCheck tries to maintain all the functionality of the
 Haskell QuickCheck, and so taking a different implementation approach than
 QuickCheck++.
 
+## UNIT TESTS
+
+Unit tests exists in the directory 'test'.
+
+```
+$ cmake .
+$ make check
+```
+
 ## LICENSE
 
 CppQuickCheck is distributed under a BSD license (see LICENSE).

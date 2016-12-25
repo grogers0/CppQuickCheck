@@ -19,3 +19,8 @@ install(TARGETS cppqc DESTINATION "lib")
 enable_testing()
 add_executable(all-catch-tests test/catch-main.cpp test/shrink-explosion-protection.cpp)
 add_test(all-catch-tests all-catch-tests)
+
+# workaround to force cmake to build test executable before running the test
+# (source: http://stackoverflow.com/a/736838/783510)
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
+                  DEPENDS all-catch-tests)
