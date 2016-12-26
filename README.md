@@ -59,6 +59,14 @@ To get a more detailed output, rerun it with
 $ ./all-catch-tests
 ```
 
+## CONTRIBUTING
+
+Please direct your pull requests to https://github.com/philipp-classen/CppQuickCheck,
+which is the repository where the active development takes place.
+
+Currently, CppQuickCheck uses C++11 but not C++14. Travis will compile
+the library and run the tests with GCC 4.9 and Clang 3.8.
+
 ## LICENSE
 
 CppQuickCheck is distributed under a BSD license (see LICENSE).
