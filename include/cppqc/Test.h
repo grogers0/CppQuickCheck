@@ -38,6 +38,18 @@
 
 namespace cppqc {
 
+using SeedType = uint32_t;
+
+// By default, a random seed will be used.
+// To overwrite the default behaviour, set the environment variable
+// "CPPQUICKCHECK_SEED".
+constexpr SeedType USE_DEFAULT_SEED = std::numeric_limits<uint32_t>::max();
+
+// If this environment variable is set, its value will overwrite the
+// default seed. In other words, no random seed will be generated but
+// if a seed has been explicitly set, it will will be used.
+constexpr const char* CPPQUICKCHECK_SEED_ENV = "CPPQUICKCHECK_SEED";
+
 enum ResultType
 {
     QC_SUCCESS, // All tests succeeded
@@ -51,6 +63,7 @@ struct Result
     ResultType result;
     std::size_t numTests;
     std::multimap<std::size_t, std::string> labels;
+    SeedType seed;
 
     // only used if result is QC_FAILURE
     std::size_t numShrinks;
@@ -137,18 +150,6 @@ continueShrinking:
         return std::make_pair(numShrinks, shrunk);
     }
 }
-
-using SeedType = uint32_t;
-
-// By default, a random seed will be used.
-// To overwrite the default behaviour, set the environment variable
-// "CPPQUICKCHECK_SEED".
-constexpr SeedType USE_DEFAULT_SEED = std::numeric_limits<uint32_t>::max();
-
-// If this environment variable is set, its value will overwrite the
-// default seed. In other words, no random seed will be generated but
-// if a seed has been explicitly set, it will will be used.
-constexpr const char* CPPQUICKCHECK_SEED_ENV = "CPPQUICKCHECK_SEED";
 
 namespace detail {
     inline SeedType resolveSeed(SeedType originalSeed = USE_DEFAULT_SEED)
@@ -245,12 +246,15 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
                     out << " for input:\n";
                     printInput(out, in);
                 }
+                out << "(To reproduce the test, use "
+                    << CPPQUICKCHECK_SEED_ENV << '=' << seed << ")\n";
 
                 if (prop.expect()) {
                     Result ret;
                     ret.result = QC_FAILURE;
                     ret.numTests = numSuccess + 1;
                     ret.labels = detail::convertLabels(labelsCollected);
+                    ret.seed = seed;
                     ret.numShrinks = numShrinks;
                     ret.usedSize = size;
                     return ret;
@@ -259,6 +263,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
                     ret.result = QC_SUCCESS;
                     ret.numTests = numSuccess + 1;
                     ret.labels = detail::convertLabels(labelsCollected);
+                    ret.seed = seed;
                     return ret;
                 }
             }
@@ -271,6 +276,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
                 ret.result = QC_GAVE_UP;
                 ret.numTests = numSuccess;
                 ret.labels = detail::convertLabels(labelsCollected);
+                ret.seed = seed;
                 return ret;
             }
         }
@@ -290,6 +296,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
         ret.result = QC_SUCCESS;
         ret.numTests = numSuccess;
         ret.labels = labels;
+        ret.seed = seed;
         return ret;
     } else {
         out << "*** Failed! Expected failure but passed " << numSuccess
@@ -303,6 +310,7 @@ Result quickCheckOutput(const Property<T0, T1, T2, T3, T4> &prop,
         ret.result = QC_NO_EXPECTED_FAILURE;
         ret.numTests = numSuccess;
         ret.labels = labels;
+        ret.seed = seed;
         return ret;
     }
 }
