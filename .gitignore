@@ -16,4 +16,5 @@ examples/testSortCompact
 examples/exampleElementsGen
 examples/testSlowShrinking
 
+libcppqc.so
 all-catch-tests
